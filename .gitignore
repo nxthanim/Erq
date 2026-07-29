@@ -1,0 +1,7 @@
+node_modules/
+.env
+*.log
+server/generated-projects/
+
+.vercel
+nul

@@ -1,0 +1,139 @@
+Build a full-stack freelance marketplace web application called 'Gebeya' designed for the Ethiopian market.
+
+CRITICAL: This is a DESKTOP-FIRST web application. Optimize the UI for laptop and desktop screens (minimum width 1024px). Do NOT build for mobile first.
+
+Tech Stack (all free):
+
+Backend: Node.js with Express
+
+Database: PostgreSQL (use free tier like Neon or Supabase)
+
+Frontend: EJS templates or React with plain CSS/Tailwind CDN
+
+Authentication: JWT-based login/signup
+
+Payments: TeleBirr Merchant API sandbox (free)
+
+Hosting: Deploy to Render or Vercel free tier
+
+User Roles:
+
+Clients — people who need work done
+
+Freelancers — people offering services
+
+Admin — platform manager
+
+Features to build:
+
+Authentication:
+
+Signup/Login for Clients and Freelancers
+
+Profile setup: name, phone number, city, profile picture upload
+
+Admin login with separate dashboard
+
+For Freelancers:
+
+Create and manage "Gigs" (services they offer)
+
+Each Gig has: title, description, price (in Ethiopian Birr), category (Translation, Graphic Design, Video Editing, Web Development, Virtual Assistant, Social Media Management), delivery time (in days)
+
+Upload portfolio images for each Gig
+
+View incoming job bids and accept/reject them
+
+For Clients:
+
+Post "Jobs" describing what they need
+
+Each Job has: title, description, budget range, category, deadline
+
+Browse freelancers and their Gigs
+
+Send direct messages to freelancers to negotiate
+
+Award a job to a freelancer
+
+Marketplace Features:
+
+Search bar with keyword filtering
+
+Category filter (dropdown or sidebar)
+
+Price range slider
+
+Sort by: price (low-high), rating, newest
+
+All filtering works on the frontend without external services
+
+Messaging:
+
+Real-time chat between Client and Freelancer using Socket.io (WebSockets)
+
+Chat history stored in database
+
+Payment & Escrow (TeleBirr):
+
+Integrate TeleBirr Merchant API sandbox
+
+When Client accepts a bid, money goes into "Escrow" (held status)
+
+Freelancer marks work as "Delivered"
+
+Client reviews and clicks "Approve"
+
+Money is released to Freelancer's TeleBirr account
+
+If Client rejects, dispute process (admin reviews)
+
+Reviews & Ratings:
+
+After job completion, both parties rate each other (1-5 stars)
+
+Reviews displayed on freelancer profiles
+
+Admin Dashboard:
+
+View all users, Gigs, Jobs, and transactions
+
+Manually verify freelancers (toggle a "Verified" badge)
+
+Resolve disputes (release or refund escrow funds)
+
+View platform statistics (total users, jobs, revenue)
+
+UI Requirements:
+
+Clean, professional dashboard-style layout
+
+Left sidebar navigation for logged-in users
+
+Bilingual support: English by default, with a toggle for Amharic (use a simple JSON translation file)
+
+Fast loading on moderate internet connections
+
+All text should be readable and well-spaced on desktop screens
+
+Deployment:
+
+Provide a one-click deploy script for Render or Vercel (free tier)
+
+Use environment variables for all sensitive data (database URL, JWT secret, TeleBirr API keys)
+
+Include a README.md with setup instructions
+
+Important Constraints:
+
+Do NOT use any paid APIs or services
+
+Use only free tiers (Supabase/Neon for DB, Render/Vercel for hosting)
+
+TeleBirr sandbox is free — use it
+
+No Stripe, no PayPal — only TeleBirr
+
+The app must run locally with npm start without any paid environment variables
+
+Build the entire thing now — all files, all routes, all models, all views"

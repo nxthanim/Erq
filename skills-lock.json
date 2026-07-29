@@ -1,0 +1,131 @@
+{
+  "version": 1,
+  "skills": {
+    "4k-vfx": {
+      "source": "Pika-Labs/Pika-Plugins",
+      "sourceType": "github",
+      "skillPath": "skills/4k-vfx/SKILL.md",
+      "computedHash": "e02ac772ab7daf8ba4737f7fde4706b897ad79512ea62f63070bd5994764384d"
+    },
+    "anime-soccer": {
+      "source": "Pika-Labs/Pika-Plugins",
+      "sourceType": "github",
+      "skillPath": "skills/anime-soccer/SKILL.md",
+      "computedHash": "ee7fc14805c394d469489c4eb7565e4d352f43a76710e2f6641bb040097af27a"
+    },
+    "app-sizzle": {
+      "source": "Pika-Labs/Pika-Plugins",
+      "sourceType": "github",
+      "skillPath": "skills/app-sizzle/SKILL.md",
+      "computedHash": "71637441ca54326f2428d638d82adf1b6012ec056af7a029e96047e6a58f7405"
+    },
+    "app-store-screens": {
+      "source": "Pika-Labs/Pika-Plugins",
+      "sourceType": "github",
+      "skillPath": "skills/app-store-screens/SKILL.md",
+      "computedHash": "2b52682ba9e74c3cfebc14bbc3801e3dd72de3b4a6ceab3955560e9ce7aa73e0"
+    },
+    "baseball-trend": {
+      "source": "Pika-Labs/Pika-Plugins",
+      "sourceType": "github",
+      "skillPath": "skills/baseball-trend/SKILL.md",
+      "computedHash": "3e7cc51d73c5827ecd2990ee40cf18238f0a030e8236ee11fe98b17477faa917"
+    },
+    "build-a-brand": {
+      "source": "Pika-Labs/Pika-Plugins",
+      "sourceType": "github",
+      "skillPath": "skills/build-a-brand/SKILL.md",
+      "computedHash": "3f92a1f6e9694c30df6b8e6cf0120e2fdc43cafeabbb365cf87ce2d5ffe9c95c"
+    },
+    "content-director": {
+      "source": "Pika-Labs/Pika-Plugins",
+      "sourceType": "github",
+      "skillPath": "skills/content-director/SKILL.md",
+      "computedHash": "b8ad9750476300a22fd77d26a05aa2f5078de564ac7cc17b29060e5062f820fe"
+    },
+    "explainer": {
+      "source": "Pika-Labs/Pika-Plugins",
+      "sourceType": "github",
+      "skillPath": "skills/explainer/SKILL.md",
+      "computedHash": "ba305d66bca49d8b5a2dcb379ed09e1905780f43b4745203f4a10e638d09a755"
+    },
+    "fix-my-look": {
+      "source": "Pika-Labs/Pika-Plugins",
+      "sourceType": "github",
+      "skillPath": "skills/fix-my-look/SKILL.md",
+      "computedHash": "53fa2906158332f03980e5a106b93026e667ce4e5980f49ecf5dd1e215b46ca3"
+    },
+    "founder-product-video": {
+      "source": "Pika-Labs/Pika-Plugins",
+      "sourceType": "github",
+      "skillPath": "skills/founder-product-video/SKILL.md",
+      "computedHash": "7bcdd1cd2fffb33b53a8f11c7a9fe68cb27d81b4f163bf58c90a656d11663813"
+    },
+    "gameday": {
+      "source": "Pika-Labs/Pika-Plugins",
+      "sourceType": "github",
+      "skillPath": "skills/gameday/SKILL.md",
+      "computedHash": "d2bc05e1c657b8993841e7094b36dd76b20a056e9063c1ed951f34dddb6af872"
+    },
+    "kiss-cam": {
+      "source": "Pika-Labs/Pika-Plugins",
+      "sourceType": "github",
+      "skillPath": "skills/kiss-cam/SKILL.md",
+      "computedHash": "21a75def8a4af1ee531dd6397e8f228972ed7524d5728c255286b0a37e671180"
+    },
+    "language-swap": {
+      "source": "Pika-Labs/Pika-Plugins",
+      "sourceType": "github",
+      "skillPath": "skills/language-swap/SKILL.md",
+      "computedHash": "37ec5718148f2f329fb1b99016b9f4018ea63c00f1ff50b21f79c7c7842dc537"
+    },
+    "persona-builder": {
+      "source": "Pika-Labs/Pika-Plugins",
+      "sourceType": "github",
+      "skillPath": "skills/persona-builder/SKILL.md",
+      "computedHash": "3797ac0bdee3ab05f3b65497c5714d0c2eb48e302f3123d262ab1780aba9386a"
+    },
+    "podcast": {
+      "source": "Pika-Labs/Pika-Plugins",
+      "sourceType": "github",
+      "skillPath": "skills/podcast/SKILL.md",
+      "computedHash": "ffa1909f8a75bbd9c5dfb56ff608d416a6bfda5fa6e434fb04aee2367b29caa7"
+    },
+    "refero-design": {
+      "source": "referodesign/refero_skill",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "3949c57ffde008b4047ad1030f5da735c70beebd33fce32cba516f6968ba687d"
+    },
+    "stagefight": {
+      "source": "Pika-Labs/Pika-Plugins",
+      "sourceType": "github",
+      "skillPath": "skills/stagefight/SKILL.md",
+      "computedHash": "8cb3e4c1c2d91b5e17bcbaee8aaad712147fd290ff6da430c812052ead054748"
+    },
+    "ugc-ads": {
+      "source": "Pika-Labs/Pika-Plugins",
+      "sourceType": "github",
+      "skillPath": "skills/ugc-ads/SKILL.md",
+      "computedHash": "adb5bf5f7de47a1a8a4c18c1f2739a6231bb9f0f314315c1f12c49b8f541c43d"
+    },
+    "vfx": {
+      "source": "Pika-Labs/Pika-Plugins",
+      "sourceType": "github",
+      "skillPath": "skills/vfx/SKILL.md",
+      "computedHash": "4372d038962fd3247d853bb9a37878f155f0813593b1ceb45fd1e813212a353d"
+    },
+    "viral-hook": {
+      "source": "Pika-Labs/Pika-Plugins",
+      "sourceType": "github",
+      "skillPath": "skills/viral-hook/SKILL.md",
+      "computedHash": "e398ef278111804faff025bba12e72bc792497e11cb6205897424458cc3b4a2c"
+    },
+    "voxel-it": {
+      "source": "Pika-Labs/Pika-Plugins",
+      "sourceType": "github",
+      "skillPath": "skills/voxel-it/SKILL.md",
+      "computedHash": "c58860ba6a5f153b8163c7ba5529f67b593bc8f1aad984fac9b9ae8631c11e89"
+    }
+  }
+}
