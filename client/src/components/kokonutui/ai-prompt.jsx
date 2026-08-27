@@ -133,12 +133,17 @@ export default function AI_Prompt({
     "GPT-5.6": OPENAI_SVG,
   };
 
+  const handleSubmit = () => {
+    if (!value.trim()) return;
+    onSubmit?.(value, selectedModel);
+    setValue("");
+    adjustHeight(true);
+  };
+
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      onSubmit?.(value, selectedModel);
-      setValue("");
-      adjustHeight(true);
+      handleSubmit();
     }
   };
 
@@ -253,6 +258,7 @@ export default function AI_Prompt({
                     "hover:bg-black/10 focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:ring-offset-0 dark:hover:bg-white/10"
                   )}
                   disabled={!value.trim()}
+                  onClick={handleSubmit}
                   type="button">
                   <ArrowRight
                     className={cn(
