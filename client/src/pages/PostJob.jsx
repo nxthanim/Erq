@@ -2,7 +2,7 @@ import { useState, useRef, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { jobsAPI } from '../utils/api';
-import { MARKETPLACE_CATEGORIES } from '../data/categories';
+import { MARKETPLACE_CATEGORIES } from '../categories';
 import { Plus, X, AlertCircle, Image as ImageIcon } from 'lucide-react';
 
 export default function PostJob() {
