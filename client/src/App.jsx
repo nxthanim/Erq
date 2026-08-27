@@ -21,10 +21,12 @@ import CreateGig from './pages/CreateGig';
 import PostJob from './pages/PostJob';
 import StaticPage from './pages/StaticPage';
 import AnalyticsDashboard from './pages/AnalyticsDashboard';
+import Dashboard from './pages/Dashboard';
 import AIStoreBuilder from './pages/AIStoreBuilder';
-import SavedGigs from './pages/SavedGigs';
+import CreativeStudio from './pages/CreativeStudio';
 import PortfolioGallery from './pages/PortfolioGallery';
-import DisputeCenter from './pages/DisputeCenter';
+import AdManager from './pages/AdManager';
+import ChooseRole from './pages/ChooseRole';
 import BrandPage from './pages/BrandPage';
 import EditGig from './pages/EditGig';
 import Transactions from './pages/Transactions';
@@ -33,7 +35,9 @@ import MyAgents from './pages/MyAgents';
 import MyOrders from './pages/MyOrders';
 import PurchaseConfirmation from './pages/PurchaseConfirmation';
 import Wallet from './pages/Wallet';
+import ErrorBoundary from './components/ErrorBoundary';
 import PortfolioLanding from './pages/PortfolioLanding';
+import { Analytics } from '@vercel/analytics/react';
 import WebsiteBuilder from './components/WebsiteBuilder';
 
 function ProtectedRoute({ children, roles }) {
@@ -55,7 +59,10 @@ function ProtectedRoute({ children, roles }) {
 
 function App() {
   return (
+    <>
+      <Analytics />
     <SocketProvider>
+      <ErrorBoundary>
       <Routes>
         {/* Public routes */}
         <Route path="/login" element={<Login />} />
@@ -66,6 +73,7 @@ function App() {
         <Route path="/marketplace" element={<Marketplace />} />
         <Route path="/gigs/:id" element={<GigDetail />} />
         <Route path="/freelancers/:id" element={<FreelancerProfile />} />
+        <Route path="/choose-role" element={<ChooseRole />} />
 
         {/* Protected routes */}
         <Route path="/my-gigs" element={
@@ -92,20 +100,23 @@ function App() {
         <Route path="/admin" element={
           <ProtectedRoute><Layout><AdminDashboard /></Layout></ProtectedRoute>
         } />
+        <Route path="/dashboard" element={
+          <ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>
+        } />
         <Route path="/analytics" element={
           <ProtectedRoute><Layout><AnalyticsDashboard /></Layout></ProtectedRoute>
         } />
         <Route path="/ai-store" element={
           <ProtectedRoute><Layout><AIStoreBuilder /></Layout></ProtectedRoute>
         } />
-        <Route path="/saved-gigs" element={
-          <ProtectedRoute><Layout><SavedGigs /></Layout></ProtectedRoute>
+        <Route path="/creative-studio" element={
+          <ProtectedRoute><Layout><CreativeStudio /></Layout></ProtectedRoute>
+        } />
+        <Route path="/ads" element={
+          <ProtectedRoute><Layout><AdManager /></Layout></ProtectedRoute>
         } />
         <Route path="/portfolio/:userId" element={
           <Layout><PortfolioGallery /></Layout>
-        } />
-        <Route path="/disputes" element={
-          <ProtectedRoute><Layout><DisputeCenter /></Layout></ProtectedRoute>
         } />
         <Route path="/brand" element={
           <ProtectedRoute><Layout><BrandPage /></Layout></ProtectedRoute>
@@ -147,7 +158,9 @@ function App() {
         {/* Static pages — must be LAST route */}
         <Route path="/:page" element={<StaticPage />} />
       </Routes>
+      </ErrorBoundary>
     </SocketProvider>
+    </>
   );
 }
 

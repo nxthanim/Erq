@@ -2,16 +2,15 @@ import { useState, useRef, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { jobsAPI } from '../utils/api';
+import { MARKETPLACE_CATEGORIES } from '../data/categories';
 import { Plus, X, AlertCircle, Image as ImageIcon } from 'lucide-react';
-
-const categories = ['Translation', 'Graphic Design', 'Video Editing', 'Web Development', 'Virtual Assistant', 'Social Media Management'];
 
 export default function PostJob() {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const previewRef = useRef(null);
   const [form, setForm] = useState({
-    title: '', description: '', budgetMin: '', budgetMax: '', category: '', deadline: ''
+    title: '', description: '', budgetMin: '', budgetMax: '', category: '', customCategory: '', deadline: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -27,15 +26,14 @@ export default function PostJob() {
     }
     setLoading(true);
     try {
-      let res;
-      if (attachments.length > 0) {
-        const formData = new FormData();
-        Object.entries(form).forEach(([k, v]) => formData.append(k, v));
-        attachments.forEach(f => formData.append('attachments', f));
-        res = await jobsAPI.create(formData);
-      } else {
-        res = await jobsAPI.create(form);
-      }
+      // The backend expects a JSON body (JobCreateRequest); attachments are
+      // not persisted server-side yet, so always send the plain JSON payload.
+      const res = await jobsAPI.create({
+        ...form,
+        category: form.category === 'Custom Category' ? form.customCategory.trim() : form.category,
+        budgetMin: parseFloat(form.budgetMin),
+        budgetMax: parseFloat(form.budgetMax),
+      });
       navigate(`/jobs/${res.data.job.id}`);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to post job');
@@ -90,8 +88,9 @@ export default function PostJob() {
             <label className="block text-sm font-medium text-ice-700 mb-1.5">{t('job.category')}</label>
             <select required value={form.category} onChange={e => setForm({...form, category: e.target.value})} className="input-field">
               <option value="">Select...</option>
-              {categories.map(c => <option key={c} value={c}>{c}</option>)}
+              {MARKETPLACE_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
+            {form.category === 'Custom Category' && <input required value={form.customCategory} onChange={e => setForm({...form, customCategory: e.target.value})} className="input-field mt-2" placeholder="Enter your category" />}
           </div>
           <div>
             <label className="block text-sm font-medium text-ice-700 mb-1.5">{t('job.budget.min')}</label>
@@ -113,11 +112,14 @@ export default function PostJob() {
 
         {/* Reference Images — include at least 4 preview photos like Fiverr */}
         <div>
-          <label className="block text-sm font-medium mb-2" style={{ color: '#17191c' }}>
-            Preview Photos <span style={{ color: '#5d2a1a' }}>*</span>
+          <label className="block text-sm font-medium mb-2" style={{ color: '#173a32' }}>
+            Preview Photos <span style={{ color: '#1f6f5c' }}>*</span>
           </label>
           <p style={{ color: '#777b86', fontSize: '13px' }} className="mb-3">
             Add at least <strong>4 photos</strong> so freelancers can see what you need. Listings with visuals get more bids.
+          </p>
+          <p style={{ color: '#979799', fontSize: '12px' }} className="mb-3">
+            Note: photos are shown in the live preview only — file upload isn't wired to the backend yet, so your job will post without attachments.
           </p>
           <div className="grid grid-cols-4 gap-3">
             {[0, 1, 2, 3].map(idx => {
@@ -126,7 +128,7 @@ export default function PostJob() {
               const url = isImage && file ? URL.createObjectURL(file) : null;
               return (
                 <div key={idx} className="relative aspect-[4/3] rounded-2xl overflow-hidden cursor-pointer group"
-                  style={{ backgroundColor: '#f2f2f3', border: file ? '2px solid #5d2a1a' : '2px dashed #ececec' }}
+                  style={{ backgroundColor: '#f2f2f3', border: file ? '2px solid #1f6f5c' : '2px dashed #ececec' }}
                   onClick={() => {
                     const input = document.createElement('input');
                     input.type = 'file';
@@ -168,7 +170,7 @@ export default function PostJob() {
             })}
           </div>
           {attachments.filter(f => f?.type?.startsWith('image/')).length < 4 && (
-            <p className="mt-2 text-xs flex items-center gap-1" style={{ color: '#5d2a1a' }}>
+            <p className="mt-2 text-xs flex items-center gap-1" style={{ color: '#1f6f5c' }}>
               <AlertCircle size={12} /> Add {4 - attachments.filter(f => f?.type?.startsWith('image/')).length} more photo(s)
             </p>
           )}

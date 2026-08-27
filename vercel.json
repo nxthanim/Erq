@@ -1,18 +1,18 @@
 {
   "version": 2,
   "framework": null,
-  "buildCommand": "cd client && npm run build",
-  "installCommand": "npm install --legacy-peer-deps && cd client && npm install --legacy-peer-deps --include=dev",
+  "buildCommand": "cd client && npm install --legacy-peer-deps --include=dev && npm run build",
+  "installCommand": "pip install -r requirements.txt",
   "outputDirectory": "client/dist",
   "functions": {
-    "api/index.js": {
+    "api/index.py": {
       "memory": 512,
       "maxDuration": 30
     }
   },
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api" },
-    { "source": "/socket.io/(.*)", "destination": "/api" },
+    { "source": "/api/(.*)", "destination": "/api/index.py" },
+    { "source": "/socket.io/(.*)", "destination": "/api/index.py" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [

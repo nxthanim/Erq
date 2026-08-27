@@ -17,7 +17,7 @@ function SteepButton({ style: extraStyle, className = '', children, ...props }) 
     <button
       className={`inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all ${className}`}
       {...props}
-      style={{ backgroundColor: '#17191c', color: '#ffffff', ...extraStyle }}
+      style={{ backgroundColor: '#173a32', color: '#ffffff', ...extraStyle }}
     >
       {children}
     </button>
@@ -86,14 +86,9 @@ export default function Profile() {
     try {
       const formData = new FormData();
       formData.append('profile_picture', file);
-      const token = localStorage.getItem('erq_token');
-      const res = await fetch('/api/users/profile-picture', {
-        method: 'PUT',
-        headers: { 'Authorization': `Bearer ${token}` },
-        body: formData
-      });
-      const data = await res.json();
-      if (res.ok) {
+      const res = await authAPI.uploadProfilePicture(formData);
+      const data = res.data;
+      if (res.status >= 200 && res.status < 300) {
         updateUser({ ...user, profile_picture: data.profile_picture });
         setMessage('Profile picture updated!');
       } else {
@@ -126,7 +121,7 @@ export default function Profile() {
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="max-w-4xl mx-auto">
       <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4, delay: 0.1 }} className="mb-6">
-        <h1 className="text-2xl font-bold" style={{ color: '#17191c', fontFamily: 'var(--font-signifier)', fontWeight: 400 }}>
+        <h1 className="text-2xl font-bold" style={{ color: '#173a32', fontFamily: 'var(--font-signifier)', fontWeight: 400 }}>
           {t('profile.title')}
         </h1>
         <p className="text-sm mt-1" style={{ color: '#777b86' }}>Manage your account and public profile</p>
@@ -144,7 +139,7 @@ export default function Profile() {
                 </div>
                 <button onClick={() => fileInputRef.current?.click()}
                   className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center text-xs shadow-lg transition-all opacity-0 group-hover:opacity-100 hover:scale-110"
-                  style={{ backgroundColor: '#17191c', color: '#ffffff' }}>
+                  style={{ backgroundColor: '#173a32', color: '#ffffff' }}>
                   <Camera size={12} />
                 </button>
                 <input ref={fileInputRef} type="file" accept="image/*" onChange={handleProfilePictureUpload} className="hidden" />
@@ -158,7 +153,7 @@ export default function Profile() {
                 onClick={() => fileInputRef.current?.click()}>
                 Click to change photo
               </p>
-              <h2 className="text-xl font-bold" style={{ color: '#17191c' }}>{user?.full_name}</h2>
+              <h2 className="text-xl font-bold" style={{ color: '#173a32' }}>{user?.full_name}</h2>
               <p className="capitalize" style={{ color: '#777b86' }}>{user?.role}</p>
               <button onClick={() => {
                 setShowReviews(true);
@@ -170,14 +165,14 @@ export default function Profile() {
               }}
                 className="mt-4 flex items-center justify-center gap-1 mx-auto transition-all hover:opacity-80 group"
               >
-                <Star size={16} style={{ color: '#5d2a1a', fill: '#5d2a1a' }} />
-                <span className="font-semibold" style={{ color: '#17191c' }}>{user?.rating?.toFixed(1) || '0.0'}</span>
+                <Star size={16} style={{ color: '#1f6f5c', fill: '#1f6f5c' }} />
+                <span className="font-semibold" style={{ color: '#173a32' }}>{user?.rating?.toFixed(1) || '0.0'}</span>
                 <span className="text-sm" style={{ color: '#979799' }}>({user?.review_count || 0})</span>
                 <ChevronRight size={12} style={{ color: '#979799' }} className="group-hover:translate-x-0.5 transition-transform" />
               </button>
               {user?.verified ? (
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium mt-2"
-                  style={{ backgroundColor: '#fbe1d1', color: '#5d2a1a' }}>
+                  style={{ backgroundColor: '#e7f5ef', color: '#1f6f5c' }}>
                   <CheckCircle size={12} /> {t('profile.verified')}
                 </span>
               ) : (
@@ -204,8 +199,8 @@ export default function Profile() {
                 <div className="px-4 py-3 rounded-2xl text-sm flex items-center gap-2"
                   style={{
                     backgroundColor: message.includes('successfully') || message.includes('updated') || message.includes('copied')
-                      ? '#fbe1d1' : '#fbe1d1',
-                    color: '#5d2a1a',
+                      ? '#e7f5ef' : '#e7f5ef',
+                    color: '#1f6f5c',
                     border: '1px solid rgba(93,42,26,0.2)'
                   }}>
                   <span>{message.includes('successfully') || message.includes('updated') ? <CheckCircle size={14} /> : <XCircle size={14} />}</span>
@@ -215,30 +210,30 @@ export default function Profile() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1.5" style={{ color: '#17191c' }}>{t('auth.fullname')}</label>
+                  <label className="block text-sm font-medium mb-1.5" style={{ color: '#173a32' }}>{t('auth.fullname')}</label>
                   <input type="text" required value={form.fullName} onChange={e => setForm({...form, fullName: e.target.value})}
                     className="w-full px-4 py-2.5 rounded-2xl text-sm outline-none transition-all"
-                    style={{ border: '1px solid #ececec', color: '#17191c', backgroundColor: '#ffffff' }}
-                    onFocus={e => e.target.style.borderColor = '#17191c'}
+                    style={{ border: '1px solid #ececec', color: '#173a32', backgroundColor: '#ffffff' }}
+                    onFocus={e => e.target.style.borderColor = '#173a32'}
                     onBlur={e => e.target.style.borderColor = '#ececec'} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1.5" style={{ color: '#17191c' }}>{t('auth.phone')}</label>
+                  <label className="block text-sm font-medium mb-1.5" style={{ color: '#173a32' }}>{t('auth.phone')}</label>
                   <input type="tel" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})}
                     className="w-full px-4 py-2.5 rounded-2xl text-sm outline-none transition-all"
-                    style={{ border: '1px solid #ececec', color: '#17191c', backgroundColor: '#ffffff' }}
+                    style={{ border: '1px solid #ececec', color: '#173a32', backgroundColor: '#ffffff' }}
                     placeholder="+251 91..."
-                    onFocus={e => e.target.style.borderColor = '#17191c'}
+                    onFocus={e => e.target.style.borderColor = '#173a32'}
                     onBlur={e => e.target.style.borderColor = '#ececec'} />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1.5" style={{ color: '#17191c' }}>{t('auth.city')}</label>
+                <label className="block text-sm font-medium mb-1.5" style={{ color: '#173a32' }}>{t('auth.city')}</label>
                 <select value={form.city} onChange={e => setForm({...form, city: e.target.value})}
                   className="w-full px-4 py-2.5 rounded-2xl text-sm outline-none transition-all bg-white"
-                  style={{ border: '1px solid #ececec', color: '#17191c' }}
-                  onFocus={e => e.target.style.borderColor = '#17191c'}
+                  style={{ border: '1px solid #ececec', color: '#173a32' }}
+                  onFocus={e => e.target.style.borderColor = '#173a32'}
                   onBlur={e => e.target.style.borderColor = '#ececec'}>
                   <option value="">Select city</option>
                   {cities.map(c => <option key={c} value={c}>{c}</option>)}
@@ -248,21 +243,21 @@ export default function Profile() {
               {user?.role === 'freelancer' && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium mb-1.5" style={{ color: '#17191c' }}>{t('profile.bio')}</label>
+                    <label className="block text-sm font-medium mb-1.5" style={{ color: '#173a32' }}>{t('profile.bio')}</label>
                     <textarea rows={4} value={form.bio} onChange={e => setForm({...form, bio: e.target.value})}
                       className="w-full px-4 py-2.5 rounded-2xl text-sm outline-none transition-all resize-none"
-                      style={{ border: '1px solid #ececec', color: '#17191c', backgroundColor: '#ffffff' }}
+                      style={{ border: '1px solid #ececec', color: '#173a32', backgroundColor: '#ffffff' }}
                       placeholder="Tell clients about yourself and your experience..."
-                      onFocus={e => e.target.style.borderColor = '#17191c'}
+                      onFocus={e => e.target.style.borderColor = '#173a32'}
                       onBlur={e => e.target.style.borderColor = '#ececec'} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1.5" style={{ color: '#17191c' }}>{t('profile.skills')}</label>
+                    <label className="block text-sm font-medium mb-1.5" style={{ color: '#173a32' }}>{t('profile.skills')}</label>
                     <input type="text" value={form.skills} onChange={e => setForm({...form, skills: e.target.value})}
                       className="w-full px-4 py-2.5 rounded-2xl text-sm outline-none transition-all"
-                      style={{ border: '1px solid #ececec', color: '#17191c', backgroundColor: '#ffffff' }}
+                      style={{ border: '1px solid #ececec', color: '#173a32', backgroundColor: '#ffffff' }}
                       placeholder="e.g., Translation, Web Design, Video Editing"
-                      onFocus={e => e.target.style.borderColor = '#17191c'}
+                      onFocus={e => e.target.style.borderColor = '#173a32'}
                       onBlur={e => e.target.style.borderColor = '#ececec'} />
                     <p className="text-xs mt-1" style={{ color: '#979799' }}>Separate skills with commas</p>
                   </div>
@@ -281,11 +276,11 @@ export default function Profile() {
               style={{ boxShadow: '0 0 0 1px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)' }}>
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-2xl flex items-center justify-center"
-                  style={{ backgroundColor: '#fbe1d1', color: '#5d2a1a' }}>
+                  style={{ backgroundColor: '#e7f5ef', color: '#1f6f5c' }}>
                   <Gift size={18} />
                 </div>
                 <div>
-                  <h3 className="font-semibold" style={{ color: '#17191c' }}>Referral Program</h3>
+                  <h3 className="font-semibold" style={{ color: '#173a32' }}>Referral Program</h3>
                   <p className="text-sm" style={{ color: '#777b86' }}>Invite friends and grow the community</p>
                 </div>
               </div>
@@ -293,52 +288,52 @@ export default function Profile() {
               {referral && (
                 <div className="space-y-4">
                   <div className="rounded-2xl p-4"
-                    style={{ backgroundColor: '#fbe1d1', border: '1px solid rgba(93,42,26,0.15)' }}>
-                    <p className="text-xs font-medium uppercase tracking-wider mb-1" style={{ color: '#5d2a1a' }}>Your Referral Link</p>
+                    style={{ backgroundColor: '#e7f5ef', border: '1px solid rgba(93,42,26,0.15)' }}>
+                    <p className="text-xs font-medium uppercase tracking-wider mb-1" style={{ color: '#1f6f5c' }}>Your Referral Link</p>
                     <div className="flex items-center gap-2">
                       <code className="flex-1 px-3 py-2 rounded-2xl text-sm font-mono truncate"
-                        style={{ backgroundColor: '#ffffff', border: '1px solid rgba(93,42,26,0.15)', color: '#5d2a1a' }}>
+                        style={{ backgroundColor: '#ffffff', border: '1px solid rgba(93,42,26,0.15)', color: '#1f6f5c' }}>
                         {window.location.origin}/signup?ref={referral.referral_code}
                       </code>
                       <button onClick={handleCopyReferralLink}
                         className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-all"
-                        style={{ backgroundColor: '#5d2a1a', color: '#ffffff' }}>
+                        style={{ backgroundColor: '#1f6f5c', color: '#ffffff' }}>
                         <Copy size={12} /> Copy
                       </button>
                     </div>
-                    <p className="text-xs mt-2" style={{ color: '#5d2a1a' }}>
+                    <p className="text-xs mt-2" style={{ color: '#1f6f5c' }}>
                       Code: <strong>{referral.referral_code}</strong> — Share this link with friends to invite them!
                     </p>
                   </div>
 
                   <div className="grid grid-cols-3 gap-3">
                     <div className="rounded-2xl p-4 text-center" style={{ backgroundColor: '#f2f2f3' }}>
-                      <p className="text-2xl font-bold" style={{ color: '#17191c' }}>{referralLoading ? '...' : referral.total_signups}</p>
+                      <p className="text-2xl font-bold" style={{ color: '#173a32' }}>{referralLoading ? '...' : referral.total_signups}</p>
                       <p className="text-xs" style={{ color: '#777b86' }}>Total Signups</p>
                     </div>
                     <div className="rounded-2xl p-4 text-center" style={{ backgroundColor: '#f2f2f3' }}>
-                      <p className="text-2xl font-bold" style={{ color: '#17191c' }}>{referralSignups.length}</p>
+                      <p className="text-2xl font-bold" style={{ color: '#173a32' }}>{referralSignups.length}</p>
                       <p className="text-xs" style={{ color: '#777b86' }}>Active Referrals</p>
                     </div>
-                    <div className="rounded-2xl p-4 text-center" style={{ backgroundColor: '#fbe1d1' }}>
-                      <Share2 size={24} className="mx-auto" style={{ color: '#5d2a1a' }} />
-                      <p className="text-xs mt-1" style={{ color: '#5d2a1a' }}>Keep Sharing!</p>
+                    <div className="rounded-2xl p-4 text-center" style={{ backgroundColor: '#e7f5ef' }}>
+                      <Share2 size={24} className="mx-auto" style={{ color: '#1f6f5c' }} />
+                      <p className="text-xs mt-1" style={{ color: '#1f6f5c' }}>Keep Sharing!</p>
                     </div>
                   </div>
 
                   {referralSignups.length > 0 && (
                     <div>
-                      <p className="text-sm font-medium mb-2" style={{ color: '#17191c' }}>Recent Referrals</p>
+                      <p className="text-sm font-medium mb-2" style={{ color: '#173a32' }}>Recent Referrals</p>
                       <div className="space-y-2">
                         {referralSignups.map(signup => (
                           <div key={signup.id} className="flex items-center gap-3 rounded-2xl px-4 py-2.5"
                             style={{ backgroundColor: '#f2f2f3' }}>
                             <AppAvatar src={signup.referred_picture} name={signup.referred_name} size="sm" />
                             <div className="flex-1">
-                              <p className="text-sm font-medium" style={{ color: '#17191c' }}>{signup.referred_name}</p>
+                              <p className="text-sm font-medium" style={{ color: '#173a32' }}>{signup.referred_name}</p>
                               <p className="text-xs" style={{ color: '#979799' }}>Joined {new Date(signup.joined_at).toLocaleDateString()}</p>
                             </div>
-                            <CheckCircle size={14} style={{ color: '#5d2a1a' }} />
+                            <CheckCircle size={14} style={{ color: '#1f6f5c' }} />
                           </div>
                         ))}
                       </div>
@@ -372,13 +367,13 @@ export default function Profile() {
               {/* Header */}
               <div className="flex items-center justify-between mb-5 shrink-0">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ backgroundColor: '#fbe1d1' }}>
-                    <MessageCircle size={20} style={{ color: '#5d2a1a' }} />
+                  <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ backgroundColor: '#e7f5ef' }}>
+                    <MessageCircle size={20} style={{ color: '#1f6f5c' }} />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold" style={{ color: '#17191c', fontFamily: 'var(--font-signifier)', fontWeight: 400 }}>Reviews</h3>
+                    <h3 className="text-lg font-semibold" style={{ color: '#173a32', fontFamily: 'var(--font-signifier)', fontWeight: 400 }}>Reviews</h3>
                     <p style={{ color: '#777b86', fontSize: '13px' }}>
-                      <span className="font-semibold" style={{ color: '#5d2a1a' }}>{user?.rating?.toFixed(1) || '0.0'}</span>
+                      <span className="font-semibold" style={{ color: '#1f6f5c' }}>{user?.rating?.toFixed(1) || '0.0'}</span>
                       {' '}average from {user?.review_count || 0} review{(user?.review_count || 0) !== 1 ? 's' : ''}
                     </p>
                   </div>
@@ -393,15 +388,15 @@ export default function Profile() {
               {/* Rating Summary */}
               <div className="flex items-center gap-4 mb-5 p-4 rounded-2xl shrink-0" style={{ backgroundColor: '#fafafb' }}>
                 <div className="text-center">
-                  <div className="text-3xl font-bold" style={{ color: '#17191c' }}>
+                  <div className="text-3xl font-bold" style={{ color: '#173a32' }}>
                     {user?.rating?.toFixed(1) || '0.0'}
                   </div>
                   <div className="flex items-center justify-center gap-0.5 mt-1">
                     {[1, 2, 3, 4, 5].map(star => (
                       <Star key={star} size={14}
                         style={{
-                          color: star <= Math.round(user?.rating || 0) ? '#5d2a1a' : '#ececec',
-                          fill: star <= Math.round(user?.rating || 0) ? '#5d2a1a' : 'transparent',
+                          color: star <= Math.round(user?.rating || 0) ? '#1f6f5c' : '#ececec',
+                          fill: star <= Math.round(user?.rating || 0) ? '#1f6f5c' : 'transparent',
                         }}
                       />
                     ))}
@@ -414,13 +409,13 @@ export default function Profile() {
                     return (
                       <div key={star} className="flex items-center gap-2 text-xs">
                         <span style={{ color: '#777b86', width: '12px' }}>{star}</span>
-                        <Star size={10} style={{ color: '#5d2a1a', fill: '#5d2a1a' }} />
+                        <Star size={10} style={{ color: '#1f6f5c', fill: '#1f6f5c' }} />
                         <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: '#ececec' }}>
                           <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: `${pct}%` }}
                             transition={{ duration: 0.6, delay: (5 - star) * 0.05 }}
-                            className="h-full rounded-full" style={{ backgroundColor: '#5d2a1a' }} />
+                            className="h-full rounded-full" style={{ backgroundColor: '#1f6f5c' }} />
                         </div>
                         <span style={{ color: '#979799', width: '24px', textAlign: 'right' }}>{count}</span>
                       </div>
@@ -440,7 +435,7 @@ export default function Profile() {
                     <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3" style={{ backgroundColor: '#f2f2f3' }}>
                       <MessageCircle size={24} style={{ color: '#979799' }} />
                     </div>
-                    <p className="font-medium" style={{ color: '#17191c' }}>No reviews yet</p>
+                    <p className="font-medium" style={{ color: '#173a32' }}>No reviews yet</p>
                     <p style={{ color: '#777b86', fontSize: '14px' }} className="mt-1">Reviews from completed orders will appear here</p>
                   </div>
                 ) : (
@@ -457,13 +452,13 @@ export default function Profile() {
                         <div className="flex items-center gap-2.5">
                           <AppAvatar src={review.reviewer_picture} name={review.reviewer_name} size="sm" />
                           <div>
-                            <p className="text-sm font-semibold" style={{ color: '#17191c' }}>{review.reviewer_name}</p>
+                            <p className="text-sm font-semibold" style={{ color: '#173a32' }}>{review.reviewer_name}</p>
                             <div className="flex items-center gap-1 mt-0.5">
                               {[1, 2, 3, 4, 5].map(star => (
                                 <Star key={star} size={10}
                                   style={{
-                                    color: star <= review.rating ? '#5d2a1a' : '#ececec',
-                                    fill: star <= review.rating ? '#5d2a1a' : 'transparent',
+                                    color: star <= review.rating ? '#1f6f5c' : '#ececec',
+                                    fill: star <= review.rating ? '#1f6f5c' : 'transparent',
                                   }}
                                 />
                               ))}

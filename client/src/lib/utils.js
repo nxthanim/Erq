@@ -8,9 +8,9 @@ export function cn(...classes) {
 }
 
 /**
- * Opens Chapa checkout in a new tab using the checkout URL from the server.
- * This is the RECOMMENDED approach per Chapa docs — shows their full checkout page.
- * Falls back to form POST if checkout_url is not available.
+ * Opens Chapa checkout in a new tab using the fields returned by the backend
+ * (initiateChapa). The public key comes from the server — nothing is
+ * hardcoded client-side. POSTs directly to Chapa's hosted payment endpoint.
  *
  * @param {Object} fields - Response from initiateChapa API
  * @returns {boolean} - Whether Chapa was opened successfully
@@ -21,16 +21,7 @@ export function openChapaCheckout(fields) {
     return false;
   }
 
-  // Primary: Open the checkout URL in a new tab (proper Chapa checkout page)
-  if (fields.checkout_url) {
-    const popup = window.open(fields.checkout_url, '_blank', 'noopener=yes');
-    if (popup) {
-      return true; // Opened successfully
-    }
-    // Popup blocked — fall through to form POST
-  }
-
-  // Fallback: Create a hidden form that POSTs to Chapa's hosted pay endpoint
+  // Build a hidden form that POSTs to Chapa's hosted pay endpoint
   const form = document.createElement('form');
   form.method = 'POST';
   form.action = 'https://api.chapa.co/v1/hosted/pay';
@@ -38,7 +29,7 @@ export function openChapaCheckout(fields) {
   form.style.display = 'none';
 
   const formData = {
-    public_key: fields.public_key || 'CHAPUBK_TEST-HgtwLy9cPhdQXVu7mPz16aJGeYE39Tok',
+    public_key: fields.public_key || '',
     tx_ref: fields.tx_ref,
     amount: fields.amount || '0',
     currency: fields.currency || 'ETB',

@@ -659,7 +659,7 @@ function PaymentStep({ paymentData, user, recipientDetails, onDone, onBack, onRe
       )}
 
       <ChapaInlineCheckout
-        publicKey="CHAPUBK_TEST-HgtwLy9cPhdQXVu7mPz16aJGeYE39Tok"
+        publicKey={chapaForm?.public_key || ''}
         txRef={chapaForm?.tx_ref}
         amount={paymentData.amount}
         currency="ETB"

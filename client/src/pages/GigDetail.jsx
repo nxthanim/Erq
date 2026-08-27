@@ -34,6 +34,7 @@ export default function GigDetail() {
   const [orderStep, setOrderStep] = useState('form');
   const [orderError, setOrderError] = useState('');
   const [chapaTxRef, setChapaTxRef] = useState('');
+  const [chapaPublicKey, setChapaPublicKey] = useState('');
   
   const projectTypes = [
     { id: 'new', label: 'New Project', icon: FileText, desc: 'Create something from scratch' },
@@ -71,7 +72,7 @@ export default function GigDetail() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#17191c]/20 border-t-[#17191c]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#173a32]/20 border-t-[#173a32]"></div>
       </div>
     );
   }
@@ -84,7 +85,7 @@ export default function GigDetail() {
     <button
       className={`inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all ${className}`}
       {...props}
-      style={{ backgroundColor: '#17191c', color: '#ffffff', ...extraStyle }}
+      style={{ backgroundColor: '#173a32', color: '#ffffff', ...extraStyle }}
     >
       {children}
     </button>
@@ -94,7 +95,7 @@ export default function GigDetail() {
     <button
       className={`inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all ${className}`}
       {...props}
-      style={{ backgroundColor: 'transparent', color: '#17191c', border: '1px solid #17191c', ...extraStyle }}
+      style={{ backgroundColor: 'transparent', color: '#173a32', border: '1px solid #173a32', ...extraStyle }}
     >
       {children}
     </button>
@@ -114,15 +115,15 @@ export default function GigDetail() {
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium mb-2"
-                    style={{ backgroundColor: '#fbe1d1', color: '#5d2a1a' }}>
+                    style={{ backgroundColor: '#e7f5ef', color: '#1f6f5c' }}>
                     {gig.category}
                   </span>
-                  <h1 className="text-2xl" style={{ fontFamily: 'var(--font-signifier)', fontWeight: 400, color: '#17191c' }}>
+                  <h1 className="text-2xl" style={{ fontFamily: 'var(--font-signifier)', fontWeight: 400, color: '#173a32' }}>
                     {gig.title}
                   </h1>
                 </div>
                 <div className="text-right">
-                  <p className="text-3xl font-medium" style={{ color: '#17191c' }}>ETB {gig.price?.toLocaleString()}</p>
+                  <p className="text-3xl font-medium" style={{ color: '#173a32' }}>ETB {gig.price?.toLocaleString()}</p>
                   <p className="text-sm" style={{ color: '#777b86' }}>{t('marketplace.per.project')}</p>
                 </div>
               </div>
@@ -135,7 +136,7 @@ export default function GigDetail() {
               </div>
 
               <div className="mt-6">
-                <h3 className="font-medium mb-3" style={{ color: '#17191c' }}>Description</h3>
+                <h3 className="font-medium mb-3" style={{ color: '#173a32' }}>Description</h3>
                 <p className="leading-relaxed whitespace-pre-wrap" style={{ color: '#777b86' }}>{gig.description}</p>
               </div>
             </div>
@@ -143,7 +144,7 @@ export default function GigDetail() {
             {/* Portfolio Images */}
             {portfolioImages.length > 0 && (
               <div className="p-6 rounded-3xl" style={{ backgroundColor: '#f2f2f3' }}>
-                <h3 className="font-medium mb-4" style={{ color: '#17191c' }}>Portfolio</h3>
+                <h3 className="font-medium mb-4" style={{ color: '#173a32' }}>Portfolio</h3>
                 <div className="grid grid-cols-2 gap-4">
                   {portfolioImages.map((img, i) => (
                     <img key={i} src={img} alt={`Portfolio ${i + 1}`}
@@ -156,15 +157,15 @@ export default function GigDetail() {
             {/* Contact Form */}
             {user && user.id !== gig.freelancer_id && (
               <div id="order-contact-section" className="p-6 rounded-3xl" style={{ backgroundColor: '#f2f2f3' }}>
-                <h3 className="font-medium mb-4" style={{ color: '#17191c' }}>Contact Freelancer</h3>
+                <h3 className="font-medium mb-4" style={{ color: '#173a32' }}>Contact Freelancer</h3>
                 <textarea
                   value={message}
                   onChange={e => setMessage(e.target.value)}
                   placeholder="Hi, I'm interested in your gig. Let's discuss..."
                   rows={3}
                   className="w-full px-4 py-3 rounded-2xl text-sm outline-none transition-all mb-3"
-                  style={{ border: '1px solid #ececec', backgroundColor: '#ffffff', color: '#17191c', resize: 'vertical' }}
-                  onFocus={e => e.target.style.borderColor = '#17191c'}
+                  style={{ border: '1px solid #ececec', backgroundColor: '#ffffff', color: '#173a32', resize: 'vertical' }}
+                  onFocus={e => e.target.style.borderColor = '#173a32'}
                   onBlur={e => e.target.style.borderColor = '#ececec'}
                 />
                 <SteepButton onClick={handleContact} disabled={sending || !message.trim()}
@@ -180,7 +181,7 @@ export default function GigDetail() {
             {/* Order Card */}
             <div className="p-6 rounded-3xl" style={{ backgroundColor: '#f2f2f3' }}>
               <div className="text-center mb-4">
-                <p className="text-3xl font-medium" style={{ color: '#17191c' }}>ETB {gig.price?.toLocaleString()}</p>
+                <p className="text-3xl font-medium" style={{ color: '#173a32' }}>ETB {gig.price?.toLocaleString()}</p>
                 <p className="text-sm" style={{ color: '#777b86' }}>{t('marketplace.per.project')}</p>
                 <p className="text-xs mt-1 flex items-center justify-center gap-1" style={{ color: '#979799' }}>
                   <Timer size={12} /> {gig.delivery_time} {t('marketplace.days')} {t('marketplace.delivery')}
@@ -216,14 +217,14 @@ export default function GigDetail() {
               )}
               {!user && (
                 <Link to="/login" className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium w-full text-center"
-                  style={{ backgroundColor: '#17191c', color: '#ffffff', height: '44px' }}>
+                  style={{ backgroundColor: '#173a32', color: '#ffffff', height: '44px' }}>
                   <Lock size={15} /> Login to Order
                 </Link>
               )}
               {user && user.id !== gig.freelancer_id && (
                 <Link to={`/freelancers/${gig.freelancer_id}`}
                   className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium w-full text-center mt-2"
-                  style={{ backgroundColor: 'transparent', color: '#17191c', border: '1px solid #17191c', height: '44px' }}>
+                  style={{ backgroundColor: 'transparent', color: '#173a32', border: '1px solid #173a32', height: '44px' }}>
                   View Profile
                 </Link>
               )}
@@ -231,7 +232,7 @@ export default function GigDetail() {
                 <div className="space-y-2 mt-2">
                   <button onClick={() => setShowDeleteModal(true)}
                     className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium w-full"
-                    style={{ backgroundColor: 'transparent', color: '#5d2a1a', border: '1px solid #5d2a1a', height: '44px' }}>
+                    style={{ backgroundColor: 'transparent', color: '#1f6f5c', border: '1px solid #1f6f5c', height: '44px' }}>
                     <Trash2 size={15} /> Delete Gig
                   </button>
                 </div>
@@ -240,17 +241,17 @@ export default function GigDetail() {
 
             {/* About the Freelancer */}
             <div className="p-6 rounded-3xl" style={{ backgroundColor: '#f2f2f3' }}>
-              <h3 className="font-medium mb-4" style={{ color: '#17191c' }}>About the Freelancer</h3>
+              <h3 className="font-medium mb-4" style={{ color: '#173a32' }}>About the Freelancer</h3>
               <Link to={`/freelancers/${gig.freelancer_id}`} className="flex items-center gap-3 mb-4 group">
                 <AppAvatar src={gig.freelancer_picture} name={gig.freelancer_name} size="lg" />
                 <div>
-                  <p className="font-medium group-hover:opacity-70 transition-opacity" style={{ color: '#17191c' }}>{gig.freelancer_name}</p>
+                  <p className="font-medium group-hover:opacity-70 transition-opacity" style={{ color: '#173a32' }}>{gig.freelancer_name}</p>
                   <div className="flex items-center gap-1">
-                    <Star size={14} style={{ color: '#5d2a1a', fill: '#5d2a1a' }} />
+                    <Star size={14} style={{ color: '#1f6f5c', fill: '#1f6f5c' }} />
                     <span className="text-sm" style={{ color: '#777b86' }}>{gig.freelancer_rating?.toFixed(1) || '0.0'}</span>
                     {gig.freelancer_verified ? (
                       <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ml-1"
-                        style={{ backgroundColor: '#fbe1d1', color: '#5d2a1a' }}>Verified</span>
+                        style={{ backgroundColor: '#e7f5ef', color: '#1f6f5c' }}>Verified</span>
                     ) : null}
                   </div>
                   {gig.freelancer_city && (
@@ -288,25 +289,25 @@ export default function GigDetail() {
               {orderStep === 'done' ? (
                 <div className="text-center py-8">
                   <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
-                    style={{ backgroundColor: '#fbe1d1' }}>
-                    <CheckCircle size={40} style={{ color: '#5d2a1a' }} />
+                    style={{ backgroundColor: '#e7f5ef' }}>
+                    <CheckCircle size={40} style={{ color: '#1f6f5c' }} />
                   </div>
-                  <h2 className="text-2xl font-bold mb-2" style={{ color: '#17191c', fontFamily: 'var(--font-signifier)', fontWeight: 400 }}>
+                  <h2 className="text-2xl font-bold mb-2" style={{ color: '#173a32', fontFamily: 'var(--font-signifier)', fontWeight: 400 }}>
                     Order Placed!
                   </h2>
                   <p className="mb-4" style={{ color: '#777b86' }}>
-                    Your order has been sent to <strong style={{ color: '#17191c' }}>{gig.freelancer_name}</strong>.
+                    Your order has been sent to <strong style={{ color: '#173a32' }}>{gig.freelancer_name}</strong>.
                     They will review it and respond shortly.
                   </p>
                   <div className="rounded-2xl p-4 mb-6" style={{ backgroundColor: '#f2f2f3' }}>
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm" style={{ color: '#777b86' }}>Status</span>
                       <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
-                        style={{ backgroundColor: '#fbe1d1', color: '#5d2a1a' }}>Pending</span>
+                        style={{ backgroundColor: '#e7f5ef', color: '#1f6f5c' }}>Pending</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm" style={{ color: '#777b86' }}>Amount</span>
-                      <span className="font-bold" style={{ color: '#5d2a1a' }}>ETB {gig.price?.toLocaleString()}</span>
+                      <span className="font-bold" style={{ color: '#1f6f5c' }}>ETB {gig.price?.toLocaleString()}</span>
                     </div>
                   </div>
                   <div className="flex gap-3 justify-center">
@@ -321,8 +322,8 @@ export default function GigDetail() {
               ) : orderStep === 'verifying' ? (
                 /* Verifying */
                 <div className="text-center py-10">
-                  <Loader2 size={36} className="animate-spin mx-auto mb-4" style={{ color: '#5d2a1a' }} />
-                  <h3 className="text-lg font-bold mb-2" style={{ color: '#17191c' }}>Verifying Payment...</h3>
+                  <Loader2 size={36} className="animate-spin mx-auto mb-4" style={{ color: '#1f6f5c' }} />
+                  <h3 className="text-lg font-bold mb-2" style={{ color: '#173a32' }}>Verifying Payment...</h3>
                   <p className="text-sm" style={{ color: '#777b86' }}>Please wait while we confirm your payment with Chapa's secure API.</p>
                 </div>
               ) : orderStep === 'checkout' ? (
@@ -330,11 +331,11 @@ export default function GigDetail() {
                 <>
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ backgroundColor: '#fbe1d1' }}>
-                        <ShoppingCart size={22} style={{ color: '#5d2a1a' }} />
+                      <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ backgroundColor: '#e7f5ef' }}>
+                        <ShoppingCart size={22} style={{ color: '#1f6f5c' }} />
                       </div>
                       <div>
-                        <h2 className="text-lg font-bold" style={{ color: '#17191c' }}>Complete Payment</h2>
+                        <h2 className="text-lg font-bold" style={{ color: '#173a32' }}>Complete Payment</h2>
                         <p className="text-xs" style={{ color: '#979799' }}>{gig.title}</p>
                       </div>
                     </div>
@@ -349,12 +350,12 @@ export default function GigDetail() {
                       <div className="flex items-center gap-3">
                         <AppAvatar src={gig.freelancer_picture} name={gig.freelancer_name} size="sm" />
                         <div>
-                          <p className="font-medium text-sm" style={{ color: '#17191c' }}>{gig.freelancer_name}</p>
+                          <p className="font-medium text-sm" style={{ color: '#173a32' }}>{gig.freelancer_name}</p>
                           <p className="text-xs" style={{ color: '#979799' }}>{gig.category}</p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold" style={{ color: '#5d2a1a' }}>ETB {gig.price?.toLocaleString()}</p>
+                        <p className="font-bold" style={{ color: '#1f6f5c' }}>ETB {gig.price?.toLocaleString()}</p>
                         <p className="text-[10px]" style={{ color: '#979799' }}><Timer size={10} className="inline" /> {gig.delivery_time} days</p>
                       </div>
                     </div>
@@ -362,14 +363,14 @@ export default function GigDetail() {
 
                   {orderError && (
                     <div className="mb-4 p-3 rounded-2xl text-sm flex items-start gap-2"
-                      style={{ backgroundColor: '#fbe1d1', color: '#5d2a1a', border: '1px solid rgba(93,42,26,0.2)' }}>
+                      style={{ backgroundColor: '#e7f5ef', color: '#1f6f5c', border: '1px solid rgba(93,42,26,0.2)' }}>
                       <AlertOctagon size={14} className="shrink-0 mt-0.5" />
                       <span>{orderError}</span>
                     </div>
                   )}
 
                   <ChapaInlineCheckout
-                    publicKey="CHAPUBK_TEST-HgtwLy9cPhdQXVu7mPz16aJGeYE39Tok"
+                    publicKey={chapaPublicKey}
                     txRef={chapaTxRef}
                     amount={gig.price}
                     currency="ETB"
@@ -404,11 +405,11 @@ export default function GigDetail() {
                   {/* Header */}
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ backgroundColor: '#fbe1d1' }}>
-                        <ShoppingCart size={22} style={{ color: '#5d2a1a' }} />
+                      <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ backgroundColor: '#e7f5ef' }}>
+                        <ShoppingCart size={22} style={{ color: '#1f6f5c' }} />
                       </div>
                       <div>
-                        <h2 className="text-lg font-bold" style={{ color: '#17191c' }}>Place Your Order</h2>
+                        <h2 className="text-lg font-bold" style={{ color: '#173a32' }}>Place Your Order</h2>
                         <p className="text-xs" style={{ color: '#979799' }}>{gig.title}</p>
                       </div>
                     </div>
@@ -424,12 +425,12 @@ export default function GigDetail() {
                       <div className="flex items-center gap-3">
                         <AppAvatar src={gig.freelancer_picture} name={gig.freelancer_name} size="sm" />
                         <div>
-                          <p className="font-medium text-sm" style={{ color: '#17191c' }}>{gig.freelancer_name}</p>
+                          <p className="font-medium text-sm" style={{ color: '#173a32' }}>{gig.freelancer_name}</p>
                           <p className="text-xs" style={{ color: '#979799' }}>{gig.category}</p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold" style={{ color: '#5d2a1a' }}>ETB {gig.price?.toLocaleString()}</p>
+                        <p className="font-bold" style={{ color: '#1f6f5c' }}>ETB {gig.price?.toLocaleString()}</p>
                         <p className="text-[10px]" style={{ color: '#979799' }}><Timer size={10} className="inline" /> {gig.delivery_time} days</p>
                       </div>
                     </div>
@@ -437,8 +438,8 @@ export default function GigDetail() {
 
                   {/* Step 1: Project Type */}
                   <div className="mb-5">
-                    <label className="block text-sm font-semibold mb-3" style={{ color: '#17191c' }}>
-                      What type of project is this? <span style={{ color: '#5d2a1a' }}>*</span>
+                    <label className="block text-sm font-semibold mb-3" style={{ color: '#173a32' }}>
+                      What type of project is this? <span style={{ color: '#1f6f5c' }}>*</span>
                     </label>
                     <div className="grid grid-cols-2 gap-2">
                       {projectTypes.map(type => {
@@ -449,15 +450,15 @@ export default function GigDetail() {
                             onClick={() => setProjectType(type.id)}
                             className="p-3 rounded-2xl text-left transition-all"
                             style={{
-                              border: projectType === type.id ? '2px solid #5d2a1a' : '1px solid #ececec',
-                              backgroundColor: projectType === type.id ? '#fbe1d120' : 'transparent'
+                              border: projectType === type.id ? '2px solid #1f6f5c' : '1px solid #ececec',
+                              backgroundColor: projectType === type.id ? '#e7f5ef20' : 'transparent'
                             }}
                           >
                             <div className="w-9 h-9 rounded-lg flex items-center justify-center mb-2"
-                              style={{ backgroundColor: projectType === type.id ? '#5d2a1a' : '#f2f2f3', color: projectType === type.id ? '#ffffff' : '#777b86' }}>
+                              style={{ backgroundColor: projectType === type.id ? '#1f6f5c' : '#f2f2f3', color: projectType === type.id ? '#ffffff' : '#777b86' }}>
                               <Icon size={16} />
                             </div>
-                            <p className="text-sm font-medium" style={{ color: projectType === type.id ? '#5d2a1a' : '#17191c' }}>
+                            <p className="text-sm font-medium" style={{ color: projectType === type.id ? '#1f6f5c' : '#173a32' }}>
                               {type.label}
                             </p>
                             <p className="text-[10px] mt-0.5" style={{ color: '#979799' }}>{type.desc}</p>
@@ -469,7 +470,7 @@ export default function GigDetail() {
 
                   {/* Step 2: Requirements */}
                   <div className="mb-6">
-                    <label className="block text-sm font-semibold mb-2" style={{ color: '#17191c' }}>
+                    <label className="block text-sm font-semibold mb-2" style={{ color: '#173a32' }}>
                       What do you need done? <span style={{ color: '#979799', fontWeight: 400 }}>(describe your requirements)</span>
                     </label>
                     <textarea
@@ -478,8 +479,8 @@ export default function GigDetail() {
                       placeholder={`Describe what you need:\n• What exactly should the freelancer create?\n• Any specific files, formats, or examples?\n• Deadline or timeline preferences?\n• Any reference materials or inspirations?`}
                       rows={5}
                       className="w-full px-4 py-3 rounded-2xl text-sm outline-none resize-none transition-all"
-                      style={{ border: '1px solid #ececec', color: '#17191c', backgroundColor: '#ffffff' }}
-                      onFocus={e => e.target.style.borderColor = '#17191c'}
+                      style={{ border: '1px solid #ececec', color: '#173a32', backgroundColor: '#ffffff' }}
+                      onFocus={e => e.target.style.borderColor = '#173a32'}
                       onBlur={e => e.target.style.borderColor = '#ececec'}
                     />
                     <p className="text-[10px] mt-1.5 flex items-center gap-1" style={{ color: '#979799' }}>
@@ -490,7 +491,7 @@ export default function GigDetail() {
                   {/* Error */}
                   {orderError && (
                     <div className="mb-4 p-3 rounded-2xl text-sm flex items-start gap-2"
-                      style={{ backgroundColor: '#fbe1d1', color: '#5d2a1a', border: '1px solid rgba(93,42,26,0.2)' }}>
+                      style={{ backgroundColor: '#e7f5ef', color: '#1f6f5c', border: '1px solid rgba(93,42,26,0.2)' }}>
                       <AlertOctagon size={14} className="shrink-0 mt-0.5" />
                       <span>{orderError}</span>
                     </div>
@@ -523,6 +524,7 @@ export default function GigDetail() {
                             itemTitle: projectTypes.find(t => t.id === projectType)?.label || 'Order',
                           });
                           setChapaTxRef(res.data.tx_ref);
+                          setChapaPublicKey(res.data.public_key || '');
                           setOrderStep('checkout');
                         } catch (err) {
                           setOrderError(err.response?.data?.error || 'Failed to initiate payment. Please try again.');
@@ -531,7 +533,7 @@ export default function GigDetail() {
                       disabled={orderLoading || !projectType}
                       className={`flex-1 py-3 rounded-full text-sm font-semibold transition-all flex items-center justify-center gap-2`}
                       style={{
-                        backgroundColor: !projectType ? '#f2f2f3' : '#17191c',
+                        backgroundColor: !projectType ? '#f2f2f3' : '#173a32',
                         color: !projectType ? '#979799' : '#ffffff',
                         opacity: orderLoading ? 0.7 : 1
                       }}>
@@ -548,7 +550,7 @@ export default function GigDetail() {
                     style={{ backgroundColor: '#f2f2f3', color: '#777b86' }}>
                     <Lock size={12} className="shrink-0 mt-0.5" />
                     <span>
-                      <strong style={{ color: '#17191c' }}>Secure Inline Checkout:</strong> Pay directly on this page with Telebirr, CBE Birr, or other methods. No redirect.
+                      <strong style={{ color: '#173a32' }}>Secure Inline Checkout:</strong> Pay directly on this page with Telebirr, CBE Birr, or other methods. No redirect.
                     </span>
                   </div>
                 </>

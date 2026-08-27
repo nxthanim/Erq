@@ -68,7 +68,7 @@ function ActivityItem({ activity, index }) {
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium truncate" style={{ color: '#17191c' }}>
+            <span className="text-sm font-medium truncate" style={{ color: '#173a32' }}>
               {activity.user_name}
             </span>
             <span className="text-xs px-1.5 py-0.5 rounded-full font-medium shrink-0"
@@ -79,7 +79,7 @@ function ActivityItem({ activity, index }) {
           <p className="text-xs mt-0.5 leading-relaxed" style={{ color: '#777b86' }}>
             {message}
             {activity.price && (
-              <span className="font-medium" style={{ color: '#17191c' }}> {activity.price}</span>
+              <span className="font-medium" style={{ color: '#173a32' }}> {activity.price}</span>
             )}
           </p>
           <p className="text-xs mt-0.5 flex items-center gap-1" style={{ color: '#a3a6af' }}>
@@ -116,7 +116,7 @@ function FeedStats({ stats }) {
         { label: pluralize(stats.completedJobs, 'Completed Job'), value: stats.completedJobs || '—' },
       ].map(s => (
         <div key={s.label} className="text-center p-2 rounded-[12px]" style={{ backgroundColor: '#f2f2f3' }}>
-          <p className="text-xs font-medium" style={{ color: '#17191c' }}>{typeof s.value === 'number' ? s.value.toLocaleString() : s.value}</p>
+          <p className="text-xs font-medium" style={{ color: '#173a32' }}>{typeof s.value === 'number' ? s.value.toLocaleString() : s.value}</p>
           <p className="text-xs" style={{ color: '#979799', fontSize: '9px' }}>{s.label}</p>
         </div>
       ))}
@@ -185,8 +185,8 @@ export default function LiveActivityFeed() {
     return (
       <div className="rounded-[24px] p-5" style={{ backgroundColor: '#f2f2f3' }}>
         <div className="flex items-center gap-2 mb-4">
-          <div className="w-3 h-3 rounded-full animate-pulse" style={{ backgroundColor: '#17191c' }} />
-          <span className="text-sm font-medium" style={{ color: '#17191c' }}>Live Activity</span>
+          <div className="w-3 h-3 rounded-full animate-pulse" style={{ backgroundColor: '#173a32' }} />
+          <span className="text-sm font-medium" style={{ color: '#173a32' }}>Live Activity</span>
           <span className="text-xs ml-auto" style={{ color: '#979799' }}>Loading...</span>
         </div>
         <div className="space-y-3">
@@ -210,19 +210,19 @@ export default function LiveActivityFeed() {
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2">
             <div className="relative">
-              <div className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ backgroundColor: '#17191c' }} />
-              <div className="absolute inset-0 w-2.5 h-2.5 rounded-full animate-ping opacity-25" style={{ backgroundColor: '#17191c' }} />
+              <div className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ backgroundColor: '#173a32' }} />
+              <div className="absolute inset-0 w-2.5 h-2.5 rounded-full animate-ping opacity-25" style={{ backgroundColor: '#173a32' }} />
             </div>
-            <h3 className="text-sm font-medium flex items-center gap-1.5" style={{ color: '#17191c' }}>
+            <h3 className="text-sm font-medium flex items-center gap-1.5" style={{ color: '#173a32' }}>
               Live Activity
             </h3>
             <span className="text-xs px-1.5 py-0.5 rounded-full font-medium"
-              style={{ backgroundColor: '#17191c', color: '#ffffff', fontSize: '9px' }}>LIVE</span>
+              style={{ backgroundColor: '#173a32', color: '#ffffff', fontSize: '9px' }}>LIVE</span>
           </div>
           <button
             onClick={() => setAutoScroll(!autoScroll)}
             className={`text-xs px-2 py-1 rounded-full font-medium transition-all ${autoScroll ? 'text-white' : ''}`}
-            style={{ backgroundColor: autoScroll ? '#17191c' : '#e5e5e7', color: autoScroll ? '#fff' : '#777b86' }}>
+            style={{ backgroundColor: autoScroll ? '#173a32' : '#e5e5e7', color: autoScroll ? '#fff' : '#777b86' }}>
             {autoScroll ? 'Auto' : 'Paused'}
           </button>
         </div>
@@ -258,7 +258,7 @@ export default function LiveActivityFeed() {
 
         {activities.length > 5 && (
           <div className="text-center mt-3 pt-2" style={{ borderTop: '1px solid #e5e5e7' }}>
-            <Link to="/marketplace" className="text-xs font-medium" style={{ color: '#17191c' }}>
+            <Link to="/marketplace" className="text-xs font-medium" style={{ color: '#173a32' }}>
               View all on Marketplace →
             </Link>
           </div>

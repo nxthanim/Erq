@@ -119,7 +119,7 @@ function JobDeliveryUploadModal({ isOpen, onClose, jobId, onDelivered }) {
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-5">
-          <h3 className="text-lg font-semibold" style={{ color: '#17191c' }}>Deliver Finished Work</h3>
+          <h3 className="text-lg font-semibold" style={{ color: '#173a32' }}>Deliver Finished Work</h3>
           <button onClick={onClose} style={{ color: '#777b86' }} className="p-1 rounded-lg hover:bg-gray-50 transition-all">
             <XCircle size={20} />
           </button>
@@ -139,7 +139,7 @@ function JobDeliveryUploadModal({ isOpen, onClose, jobId, onDelivered }) {
             className="hidden"
           />
           <Upload size={32} style={{ color: '#777b86' }} className="mx-auto mb-3" />
-          <p className="font-medium mb-1" style={{ color: '#17191c' }}>Click to upload finished files</p>
+          <p className="font-medium mb-1" style={{ color: '#173a32' }}>Click to upload finished files</p>
           <p style={{ color: '#979799', fontSize: '13px' }}>
             Any file type accepted — Max 100MB per file
           </p>
@@ -153,9 +153,9 @@ function JobDeliveryUploadModal({ isOpen, onClose, jobId, onDelivered }) {
               return (
                 <div key={i} className="flex items-center gap-3 p-3 rounded-xl"
                   style={{ backgroundColor: '#f2f2f3' }}>
-                  <Icon size={18} style={{ color: '#5d2a1a' }} />
+                  <Icon size={18} style={{ color: '#1f6f5c' }} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate" style={{ color: '#17191c' }}>{file.name}</p>
+                    <p className="text-sm font-medium truncate" style={{ color: '#173a32' }}>{file.name}</p>
                     <p style={{ color: '#979799', fontSize: '12px' }}>{formatFileSize(file.size)}</p>
                   </div>
                   <button onClick={() => removeFile(i)} style={{ color: '#777b86' }} className="hover:text-red-500 transition-all">
@@ -173,7 +173,7 @@ function JobDeliveryUploadModal({ isOpen, onClose, jobId, onDelivered }) {
           onChange={e => setMessage(e.target.value)}
           placeholder="Add a message about the delivery..."
           className="w-full rounded-2xl p-4 text-sm outline-none resize-none mb-4"
-          style={{ border: '1px solid #ececec', color: '#17191c', minHeight: '80px' }}
+          style={{ border: '1px solid #ececec', color: '#173a32', minHeight: '80px' }}
         />
 
         {uploading && (
@@ -185,7 +185,7 @@ function JobDeliveryUploadModal({ isOpen, onClose, jobId, onDelivered }) {
             <div className="w-full h-2 rounded-full" style={{ backgroundColor: '#f2f2f3' }}>
               <motion.div
                 className="h-full rounded-full"
-                style={{ backgroundColor: '#5d2a1a' }}
+                style={{ backgroundColor: '#1f6f5c' }}
                 initial={{ width: '0%' }}
                 animate={{ width: `${uploadProgress}%` }}
                 transition={{ duration: 0.3, ease: 'easeOut' }}
@@ -207,7 +207,7 @@ function JobDeliveryUploadModal({ isOpen, onClose, jobId, onDelivered }) {
           disabled={files.length === 0 || uploading}
           className="w-full py-3.5 rounded-full text-sm font-semibold transition-all flex items-center justify-center gap-2"
           style={{
-            backgroundColor: files.length > 0 && !uploading ? '#17191c' : '#f2f2f3',
+            backgroundColor: files.length > 0 && !uploading ? '#173a32' : '#f2f2f3',
             color: files.length > 0 && !uploading ? '#ffffff' : '#979799',
           }}
         >
@@ -260,7 +260,7 @@ function JobFileViewerModal({ delivery, onClose }) {
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-5">
-          <h3 className="text-lg font-semibold" style={{ color: '#17191c' }}>Delivered Files</h3>
+          <h3 className="text-lg font-semibold" style={{ color: '#173a32' }}>Delivered Files</h3>
           <button onClick={onClose} style={{ color: '#777b86' }} className="p-1 rounded-lg hover:bg-gray-50">
             <XCircle size={20} />
           </button>
@@ -268,7 +268,7 @@ function JobFileViewerModal({ delivery, onClose }) {
 
         {delivery.message && (
           <div className="mb-4 p-4 rounded-2xl" style={{ backgroundColor: '#fafafb' }}>
-            <p style={{ color: '#17191c', fontSize: '14px' }}>{delivery.message}</p>
+            <p style={{ color: '#173a32', fontSize: '14px' }}>{delivery.message}</p>
           </div>
         )}
 
@@ -278,9 +278,9 @@ function JobFileViewerModal({ delivery, onClose }) {
             return (
               <div key={i} className="p-4 rounded-2xl" style={{ backgroundColor: '#f2f2f3' }}>
                 <div className="flex items-start gap-3 mb-3">
-                  <Icon size={20} style={{ color: '#5d2a1a' }} />
+                  <Icon size={20} style={{ color: '#1f6f5c' }} />
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate" style={{ color: '#17191c' }}>{file.name}</p>
+                    <p className="font-medium text-sm truncate" style={{ color: '#173a32' }}>{file.name}</p>
                     <p style={{ color: '#979799', fontSize: '12px' }}>{formatFileSize(file.size)}</p>
                   </div>
                   {(file.data || file.url) && (
@@ -289,7 +289,7 @@ function JobFileViewerModal({ delivery, onClose }) {
                       className="p-2 rounded-xl transition-all"
                       style={{ backgroundColor: '#ffffff' }}
                     >
-                      <Download size={16} style={{ color: '#17191c' }} />
+                      <Download size={16} style={{ color: '#173a32' }} />
                     </a>
                   )}
                 </div>
@@ -456,7 +456,7 @@ export default function JobDetail() {
           {/* ===== DELIVERIES SECTION ===== */}
           {deliveries.length > 0 && (
             <div className="rounded-3xl p-6" style={{ backgroundColor: '#ffffff', border: '1px solid #f2f2f3' }}>
-              <h3 className="font-semibold text-sm mb-4 flex items-center gap-2" style={{ color: '#17191c' }}>
+              <h3 className="font-semibold text-sm mb-4 flex items-center gap-2" style={{ color: '#173a32' }}>
                 <Package size={16} /> Deliveries
               </h3>
               <div className="space-y-3">
@@ -465,21 +465,21 @@ export default function JobDetail() {
                   try { delFiles = JSON.parse(del.files || '[]'); } catch {}
                   return (
                     <div key={del.id} className="p-4 rounded-2xl" style={{ backgroundColor: '#f2f2f3' }}>
-                      {del.message && <p className="text-sm mb-2" style={{ color: '#17191c' }}>{del.message}</p>}
+                      {del.message && <p className="text-sm mb-2" style={{ color: '#173a32' }}>{del.message}</p>}
                       <div className="flex flex-wrap gap-2">
                         {delFiles.slice(0, 5).map((f, fi) => {
                           const FIcon = getFileIcon(f.type);
                           return (
                             <div key={fi} className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs"
                               style={{ backgroundColor: '#ffffff' }}>
-                              <FIcon size={12} style={{ color: '#5d2a1a' }} />
+                              <FIcon size={12} style={{ color: '#1f6f5c' }} />
                               <span className="truncate max-w-[120px]" style={{ color: '#777b86' }}>{f.name}</span>
                               {(f.data || f.url) && (
                                 <a href={f.data || f.url}
                                   download={f.name}
                                   onClick={e => e.stopPropagation()}
                                   className="p-1 rounded-lg hover:bg-gray-100 transition-all shrink-0"
-                                  style={{ color: '#5d2a1a' }}
+                                  style={{ color: '#1f6f5c' }}
                                   title="Download">
                                   <Download size={10} />
                                 </a>
@@ -495,7 +495,7 @@ export default function JobDetail() {
                       </div>
                       <button onClick={() => handleViewFiles(del)}
                         className="mt-2 inline-flex items-center gap-1 text-xs font-medium transition-all"
-                        style={{ color: '#5d2a1a' }}>
+                        style={{ color: '#1f6f5c' }}>
                         <Eye size={12} /> View All Files
                       </button>
                     </div>
@@ -691,7 +691,7 @@ export default function JobDetail() {
                 {deliveries.length > 0 && (
                   <button onClick={() => handleViewFiles(deliveries[0])}
                     className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl bg-white transition-all"
-                    style={{ color: '#5d2a1a' }}>
+                    style={{ color: '#1f6f5c' }}>
                     <Eye size={14} /> View Delivered Files
                   </button>
                 )}
@@ -779,7 +779,7 @@ export default function JobDetail() {
               {paymentIsConfirmed ? (
                 <button onClick={handleDeliverClick}
                   className="w-full py-3 rounded-full text-sm font-semibold transition-all flex items-center justify-center gap-2"
-                  style={{ backgroundColor: '#17191c', color: '#ffffff' }}>
+                  style={{ backgroundColor: '#173a32', color: '#ffffff' }}>
                   <Upload size={16} /> Deliver Finished Work
                 </button>
               ) : (

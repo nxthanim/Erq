@@ -16,6 +16,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
+  clerk_id TEXT UNIQUE,
   email TEXT UNIQUE NOT NULL,
   password TEXT NOT NULL,
   full_name TEXT NOT NULL,
@@ -31,6 +32,9 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Idempotent: add clerk_id to existing deployments (safe to re-run)
+ALTER TABLE users ADD COLUMN IF NOT EXISTS clerk_id TEXT;
 
 -- ============================================================================
 -- GIGS
@@ -299,6 +303,20 @@ CREATE TABLE IF NOT EXISTS order_deliveries (
 CREATE INDEX IF NOT EXISTS idx_order_deliveries_order ON order_deliveries(order_id);
 
 -- ============================================================================
+-- TIPS (fan tips / buy-a-coffee — creator economy feature)
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS tips (
+  id TEXT PRIMARY KEY,
+  sender_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  receiver_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  amount REAL NOT NULL,
+  message TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_tips_receiver ON tips(receiver_id);
+CREATE INDEX IF NOT EXISTS idx_tips_sender ON tips(sender_id);
+
+-- ============================================================================
 -- JOB DELIVERIES (freelancer uploads files when delivering for custom job postings)
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS job_deliveries (
@@ -518,6 +536,18 @@ CREATE INDEX IF NOT EXISTS idx_agent_conversations_agent ON agent_conversations(
 CREATE INDEX IF NOT EXISTS idx_agent_messages_conversation ON agent_messages(conversation_id);
 CREATE INDEX IF NOT EXISTS idx_email_verifications_email ON email_verifications(email);
 CREATE INDEX IF NOT EXISTS idx_email_verifications_user ON email_verifications(user_id);
+-- Hot-path indexes added during hardening (wallet queries, payment flows)
+CREATE INDEX IF NOT EXISTS idx_transactions_client ON transactions(client_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_freelancer ON transactions(freelancer_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_status ON transactions(status);
+CREATE INDEX IF NOT EXISTS idx_orders_transaction ON orders(transaction_id);
+CREATE INDEX IF NOT EXISTS idx_messages_created ON messages(created_at);
+CREATE INDEX IF NOT EXISTS idx_notifications_read ON notifications(user_id, read);
+CREATE INDEX IF NOT EXISTS idx_payment_receipts_user ON payment_receipts(user_id);
+CREATE INDEX IF NOT EXISTS idx_payment_receipts_reference ON payment_receipts(receipt_reference);
+CREATE INDEX IF NOT EXISTS idx_tips_receiver ON tips(receiver_id);
+CREATE INDEX IF NOT EXISTS idx_tips_sender ON tips(sender_id);
+CREATE INDEX IF NOT EXISTS idx_ads_user ON ads(user_id);
 
 -- ============================================================================
 -- SEED DATA
@@ -553,3 +583,24 @@ INSERT INTO user_agents (id, user_id, name, role, instructions, color, is_active
   ('agent-designer', 'system', 'Design Advisor', 'Design Consultant', 'Expert in graphic design, branding, and visual aesthetics.', '#666666', 1),
   ('agent-analyst', 'system', 'Data Analyst', 'Analytics Expert', 'Analyzes marketplace data and user performance metrics.', '#888888', 1)
 ON CONFLICT (id) DO NOTHING;
+
+-- ============================================================
+-- Rate limiting & IP bans (used by python_backend/ratelimit.py)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS rate_limit_hits (
+  id TEXT PRIMARY KEY,
+  ip TEXT NOT NULL,
+  endpoint TEXT,
+  method TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_rate_limit_ip_time ON rate_limit_hits(ip, created_at);
+
+CREATE TABLE IF NOT EXISTS banned_ips (
+  id TEXT PRIMARY KEY,
+  ip TEXT NOT NULL,
+  reason TEXT,
+  banned_until TIMESTAMP NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_banned_ips_ip ON banned_ips(ip);

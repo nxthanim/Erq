@@ -71,8 +71,8 @@ export default function ReviewModal({ open, onClose, jobId, revieweeId, reviewee
   };
 
     const labels = ['Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
-  const colors = ['#777b86', '#979799', '#5d2a1a', '#5d2a1a', '#17191c'];
-  const starFillColors = ['#777b86', '#979799', '#5d2a1a', '#5d2a1a', '#17191c'];
+  const colors = ['#777b86', '#979799', '#1f6f5c', '#1f6f5c', '#173a32'];
+  const starFillColors = ['#777b86', '#979799', '#1f6f5c', '#1f6f5c', '#173a32'];
 
   return (
     <AnimatePresence>
@@ -112,12 +112,12 @@ export default function ReviewModal({ open, onClose, jobId, revieweeId, reviewee
                   animate={{ scale: 1 }}
                   transition={{ type: 'spring', stiffness: 200, damping: 10 }}
                   className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
-                  style={{ backgroundColor: '#17191c' }}
+                  style={{ backgroundColor: '#173a32' }}
                 >
                   <ThumbsUp size={28} style={{ color: '#ffffff' }} />
                 </motion.div>
                 <h3 className="text-xl font-semibold mb-2"
-                  style={{ fontFamily: 'var(--font-signifier)', fontWeight: 400, color: '#17191c' }}>Review Submitted!</h3>
+                  style={{ fontFamily: 'var(--font-signifier)', fontWeight: 400, color: '#173a32' }}>Review Submitted!</h3>
                 <p style={{ color: '#777b86', fontSize: '15px' }}>Thank you for your feedback</p>
               </motion.div>
             ) : (
@@ -125,13 +125,13 @@ export default function ReviewModal({ open, onClose, jobId, revieweeId, reviewee
                 {/* Header */}
                 <div className="text-center mb-6">
                   <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3"
-                    style={{ backgroundColor: '#fbe1d1' }}>
-                    <MessageCircle size={24} style={{ color: '#5d2a1a' }} />
+                    style={{ backgroundColor: '#e7f5ef' }}>
+                    <MessageCircle size={24} style={{ color: '#1f6f5c' }} />
                   </div>
                   <h3 className="text-xl font-semibold"
-                    style={{ fontFamily: 'var(--font-signifier)', fontWeight: 400, color: '#17191c' }}>Rate Your Experience</h3>
+                    style={{ fontFamily: 'var(--font-signifier)', fontWeight: 400, color: '#173a32' }}>Rate Your Experience</h3>
                   <p style={{ color: '#777b86', fontSize: '15px' }} className="mt-1">
-                    How was working with <strong style={{ color: '#5d2a1a' }}>{revieweeName || 'this user'}</strong>?
+                    How was working with <strong style={{ color: '#1f6f5c' }}>{revieweeName || 'this user'}</strong>?
                   </p>
                 </div>
 
@@ -202,10 +202,10 @@ export default function ReviewModal({ open, onClose, jobId, revieweeId, reviewee
                       style={{
                         border: '1px solid #ececec',
                         borderRadius: '16px',
-                        color: '#17191c',
+                        color: '#173a32',
                         backgroundColor: '#ffffff',
                       }}
-                      onFocus={e => e.target.style.borderColor = '#17191c'}
+                      onFocus={e => e.target.style.borderColor = '#173a32'}
                       onBlur={e => e.target.style.borderColor = '#ececec'}
                     />
                   </div>
@@ -216,7 +216,7 @@ export default function ReviewModal({ open, onClose, jobId, revieweeId, reviewee
                     disabled={rating === 0 || submitting}
                     className="w-full py-3.5 rounded-full font-semibold text-sm transition-all flex items-center justify-center gap-2"
                     style={{
-                      backgroundColor: rating > 0 && !submitting ? '#17191c' : '#f2f2f3',
+                      backgroundColor: rating > 0 && !submitting ? '#173a32' : '#f2f2f3',
                       color: rating > 0 && !submitting ? '#ffffff' : '#979799',
                     }}
                     whileHover={rating > 0 ? { scale: 1.01 } : {}}

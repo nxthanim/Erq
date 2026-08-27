@@ -13,7 +13,7 @@ function SteepButton({ style: extraStyle, className = '', children, ...props }) 
     <button
       className={`inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all ${className}`}
       {...props}
-      style={{ backgroundColor: '#17191c', color: '#ffffff', ...extraStyle }}
+      style={{ backgroundColor: '#173a32', color: '#ffffff', ...extraStyle }}
     >
       {children}
     </button>
@@ -25,7 +25,7 @@ function GhostButton({ style: extraStyle, className = '', children, ...props }) 
     <button
       className={`inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all ${className}`}
       {...props}
-      style={{ backgroundColor: 'transparent', color: '#17191c', border: '1px solid #17191c', ...extraStyle }}
+      style={{ backgroundColor: 'transparent', color: '#173a32', border: '1px solid #173a32', ...extraStyle }}
     >
       {children}
     </button>
@@ -222,7 +222,7 @@ export default function Messages() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#17191c]/20 border-t-[#17191c]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#173a32]/20 border-t-[#173a32]"></div>
       </div>
     );
   }
@@ -233,10 +233,10 @@ export default function Messages() {
       <div className="w-80 flex flex-col" style={{ backgroundColor: '#ffffff', borderRight: '1px solid #ececec' }}>
         {/* Header */}
         <div className="p-4 flex items-center justify-between" style={{ borderBottom: '1px solid #ececec' }}>
-          <h2 className="text-lg font-bold" style={{ color: '#17191c' }}>{t('messages.title')}</h2>
+          <h2 className="text-lg font-bold" style={{ color: '#173a32' }}>{t('messages.title')}</h2>
           <button onClick={() => setShowSearch(!showSearch)}
             className="w-9 h-9 flex items-center justify-center rounded-full transition-all"
-            style={{ backgroundColor: showSearch ? '#f2f2f3' : 'transparent', color: '#17191c' }}
+            style={{ backgroundColor: showSearch ? '#f2f2f3' : 'transparent', color: '#173a32' }}
             title="New Message">
             {showSearch ? <X size={18} /> : <Plus size={18} />}
           </button>
@@ -250,10 +250,10 @@ export default function Messages() {
               <input ref={searchInputRef} type="text" value={searchQuery} onChange={e => handleSearch(e.target.value)}
                 placeholder="Search users by name..."
                 className="w-full pl-9 pr-4 py-2.5 rounded-2xl text-sm outline-none transition-all"
-                style={{ border: '1px solid #ececec', color: '#17191c', backgroundColor: '#ffffff' }}
-                onFocus={e => e.target.style.borderColor = '#17191c'}
+                style={{ border: '1px solid #ececec', color: '#173a32', backgroundColor: '#ffffff' }}
+                onFocus={e => e.target.style.borderColor = '#173a32'}
                 onBlur={e => e.target.style.borderColor = '#ececec'} />
-              {searching && <div className="absolute right-3 top-1/2 -translate-y-1/2"><div className="w-4 h-4 border-2 border-[#17191c]/30 border-t-[#17191c] rounded-full animate-spin" /></div>}
+              {searching && <div className="absolute right-3 top-1/2 -translate-y-1/2"><div className="w-4 h-4 border-2 border-[#173a32]/30 border-t-[#173a32] rounded-full animate-spin" /></div>}
             </div>
             {searchResults.length > 0 && (
               <div className="mt-2 space-y-1 max-h-48 overflow-y-auto">
@@ -264,7 +264,7 @@ export default function Messages() {
                       <AppAvatar src={u.profile_picture} name={u.full_name} size="sm" showStatus isOnline={isUserOnline(u.id)} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate transition-colors group-hover:opacity-70" style={{ color: '#17191c' }}>{u.full_name}</p>
+                      <p className="text-sm font-medium truncate transition-colors group-hover:opacity-70" style={{ color: '#173a32' }}>{u.full_name}</p>
                       <p className="text-[11px]" style={{ color: '#979799' }}>{u.role} {u.city ? `• ${u.city}` : ''}</p>
                     </div>
                     <MessageCircle size={14} className="shrink-0" style={{ color: '#d0d0d0' }} />
@@ -290,7 +290,7 @@ export default function Messages() {
               <p className="text-xs mt-2" style={{ color: '#979799' }}>{t('messages.start')}</p>
               <button onClick={() => setShowSearch(true)}
                 className="mt-4 text-sm font-medium inline-flex items-center gap-1.5 mx-auto hover:underline"
-                style={{ color: '#17191c' }}>
+                style={{ color: '#173a32' }}>
                 <Plus size={14} /> Find someone to message
               </button>
             </div>
@@ -301,17 +301,17 @@ export default function Messages() {
                 style={{
                   borderBottom: '1px solid #f2f2f3',
                   backgroundColor: activeChat?.other_user_id === conv.other_user_id ? '#fafafb' : 'transparent',
-                  borderLeft: activeChat?.other_user_id === conv.other_user_id ? '3px solid #5d2a1a' : '3px solid transparent'
+                  borderLeft: activeChat?.other_user_id === conv.other_user_id ? '3px solid #1f6f5c' : '3px solid transparent'
                 }}>
                 <div className="relative shrink-0">
                   <AppAvatar src={conv.other_user_picture} name={conv.other_user_name} size="md" showStatus isOnline={isUserOnline(conv.other_user_id)} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <p className="font-medium text-sm truncate" style={{ color: '#17191c' }}>{conv.other_user_name}</p>
+                    <p className="font-medium text-sm truncate" style={{ color: '#173a32' }}>{conv.other_user_name}</p>
                     {conv.unread_count > 0 && (
                       <span className="text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center"
-                        style={{ backgroundColor: '#5d2a1a', color: '#ffffff' }}>
+                        style={{ backgroundColor: '#1f6f5c', color: '#ffffff' }}>
                         {conv.unread_count}
                       </span>
                     )}
@@ -334,7 +334,7 @@ export default function Messages() {
               <AppAvatar src={activeChat.other_user_picture} name={activeChat.other_user_name} size="md" showStatus isOnline={isUserOnline(activeChat.other_user_id)} />
             </div>
             <div className="flex-1">
-              <p className="font-semibold" style={{ color: '#17191c' }}>{activeChat.other_user_name}</p>
+              <p className="font-semibold" style={{ color: '#173a32' }}>{activeChat.other_user_name}</p>
               <p className="text-xs" style={{ color: '#777b86' }}>
                 {isUserOnline(activeChat.other_user_id) ? t('messages.online') : t('messages.offline')}
               </p>
@@ -370,8 +370,8 @@ export default function Messages() {
                       ? 'rounded-2xl rounded-br-md'
                       : 'rounded-2xl rounded-bl-md'
                   }`} style={{
-                    backgroundColor: msg.sender_id === user.id ? '#17191c' : '#ffffff',
-                    color: msg.sender_id === user.id ? '#ffffff' : '#17191c',
+                    backgroundColor: msg.sender_id === user.id ? '#173a32' : '#ffffff',
+                    color: msg.sender_id === user.id ? '#ffffff' : '#173a32',
                     boxShadow: msg.sender_id !== user.id ? '0 0 0 1px rgba(0,0,0,0.04)' : 'none'
                   }}>
                     {msg.attachment_url && (
@@ -394,9 +394,9 @@ export default function Messages() {
                         ) : (
                           <a href={msg.attachment_url} download={msg.attachment_name}
                             className={`flex items-center gap-3 p-3 hover:opacity-80 transition-opacity`}
-                            style={{ color: msg.sender_id === user.id ? '#ffffff' : '#17191c' }}>
+                            style={{ color: msg.sender_id === user.id ? '#ffffff' : '#173a32' }}>
                             <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                              style={{ backgroundColor: msg.sender_id === user.id ? 'rgba(255,255,255,0.2)' : '#fbe1d1', color: msg.sender_id === user.id ? '#ffffff' : '#5d2a1a' }}>
+                              style={{ backgroundColor: msg.sender_id === user.id ? 'rgba(255,255,255,0.2)' : '#e7f5ef', color: msg.sender_id === user.id ? '#ffffff' : '#1f6f5c' }}>
                               {isPdfType(msg.attachment_type) ? <FileText size={18} /> : <FileText size={18} />}
                             </div>
                             <div className="flex-1 min-w-0">
@@ -434,12 +434,12 @@ export default function Messages() {
               <textarea value={messageText} onChange={e => setMessageText(e.target.value)} onKeyDown={handleKeyPress}
                 placeholder={t('common.type.message')} rows={1}
                 className="flex-1 px-4 py-2.5 rounded-2xl text-sm outline-none transition-all resize-none"
-                style={{ border: '1px solid #ececec', color: '#17191c', backgroundColor: '#ffffff' }}
-                onFocus={e => e.target.style.borderColor = '#17191c'}
+                style={{ border: '1px solid #ececec', color: '#173a32', backgroundColor: '#ffffff' }}
+                onFocus={e => e.target.style.borderColor = '#173a32'}
                 onBlur={e => e.target.style.borderColor = '#ececec'} />
               <button onClick={() => sendMessage()} disabled={!messageText.trim()}
                 className="w-10 h-10 rounded-full flex items-center justify-center transition-all disabled:opacity-50"
-                style={{ backgroundColor: messageText.trim() ? '#17191c' : '#f2f2f3', color: messageText.trim() ? '#ffffff' : '#d0d0d0' }}>
+                style={{ backgroundColor: messageText.trim() ? '#173a32' : '#f2f2f3', color: messageText.trim() ? '#ffffff' : '#d0d0d0' }}>
                 <Send size={16} />
               </button>
             </div>
@@ -449,7 +449,7 @@ export default function Messages() {
         <div className="flex-1 flex items-center justify-center" style={{ backgroundColor: '#fafafb' }}>
           <div className="text-center">
             <MessageCircle size={56} className="mx-auto mb-4" style={{ color: '#d0d0d0' }} />
-            <h3 className="text-xl font-semibold mb-2" style={{ color: '#17191c', fontFamily: 'var(--font-signifier)', fontWeight: 400 }}>
+            <h3 className="text-xl font-semibold mb-2" style={{ color: '#173a32', fontFamily: 'var(--font-signifier)', fontWeight: 400 }}>
               Select a Conversation
             </h3>
             <p style={{ color: '#777b86' }}>{t('messages.start')}</p>

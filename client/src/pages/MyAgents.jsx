@@ -249,13 +249,13 @@ function AgentFormModal({ isOpen, onClose, onSave, editAgent }) {
                   <UserPlus size={14} className="text-[#75644f]" />
                   <select value={form.parentAgentId} onChange={e => setForm({...form, parentAgentId: e.target.value})}
                     className="flex-1 bg-transparent text-sm outline-none text-[#75644f]">
-                    <option value="">— No parent (main agent) —</option>
+                    <option value="">â€” No parent (main agent) â€”</option>
                     {agents.map(a => <option key={a.id} value={a.id}>Subagent of: {a.name}</option>)}
                   </select>
                 </div>
               )}
               <textarea value={form.instructions} onChange={e => setForm({...form, instructions: e.target.value})}
-                placeholder="Instructions — what should this agent do?"
+                placeholder="Instructions â€” what should this agent do?"
                 rows={3} className="w-full px-4 py-2.5 rounded-xl border border-[#ebe0d0] text-sm outline-none focus:border-[#1a1a1a] resize-none" />
               <button type="submit" disabled={saving || !form.name.trim()}
                 className="w-full bg-[#1a1a1a] text-white font-semibold py-2.5 rounded-xl hover:bg-[#333333] transition-all text-sm disabled:opacity-50 flex items-center justify-center gap-2">
@@ -329,7 +329,7 @@ function ChatMessage({ msg, agent, isTyping }) {
               __html: msg.content
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                 .replace(/\n/g, '<br/>')
-                .replace(/^- (.*)/gm, '• $1')
+                .replace(/^- (.*)/gm, 'â€¢ $1')
             }} />
           )}
           <p className={`text-[9px] mt-1.5 ${msg.role === 'user' ? 'text-white/60' : 'text-[#a6967e]'}`}>
@@ -346,6 +346,7 @@ function ChatMessage({ msg, agent, isTyping }) {
 
 // ====== CHAT INTERFACE ======
 function AgentChat({ agent, onBack }) {
+  const agentId = agent?.id;
   const [conversations, setConversations] = useState([]);
   const [activeConv, setActiveConv] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -365,8 +366,13 @@ function AgentChat({ agent, onBack }) {
   }, []);
 
   useEffect(() => {
-    if (agent) fetchConversations();
-  }, [agent]);
+    if (agentId) fetchConversations();
+    else {
+      setConversations([]);
+      setActiveConv(null);
+      setMessages([]);
+    }
+  }, [agentId]);
 
   useEffect(() => { scrollToBottom(); }, [messages]);
 
@@ -375,8 +381,9 @@ function AgentChat({ agent, onBack }) {
   }, [activeConv]);
 
   const fetchConversations = async () => {
+    if (!agentId) return;
     try {
-      const res = await agentsAPI.getConversations(agent.id);
+      const res = await agentsAPI.getConversations(agentId);
       setConversations(res.data.conversations || []);
       if (res.data.conversations?.length > 0 && !activeConv) {
         setActiveConv(res.data.conversations[0]);
@@ -385,8 +392,9 @@ function AgentChat({ agent, onBack }) {
   };
 
   const fetchMessages = async (convId) => {
+    if (!agentId || !convId) return;
     try {
-      const res = await agentsAPI.getMessages(agent.id, convId);
+      const res = await agentsAPI.getMessages(agentId, convId);
       setMessages(res.data.messages || []);
     } catch {}
   };
@@ -397,8 +405,12 @@ function AgentChat({ agent, onBack }) {
   };
 
   const createConversation = async () => {
+    if (!agentId) {
+      toast?.error?.('This AI agent is unavailable. Please choose another agent.', { title: 'Agent unavailable' });
+      return;
+    }
     try {
-      const res = await agentsAPI.createConversation(agent.id, { title: 'New Conversation' });
+      const res = await agentsAPI.createConversation(agentId, { title: 'New Conversation' });
       setActiveConv(res.data.conversation);
       setMessages([]);
       fetchConversations();
@@ -411,7 +423,8 @@ function AgentChat({ agent, onBack }) {
     e.stopPropagation();
     if (!confirm('Delete this conversation?')) return;
     try {
-      await agentsAPI.deleteConversation(agent.id, convId);
+      if (!agentId || !convId) return;
+      await agentsAPI.deleteConversation(agentId, convId);
       if (activeConv?.id === convId) { setActiveConv(null); setMessages([]); }
       fetchConversations();
     } catch {}
@@ -435,7 +448,7 @@ function AgentChat({ agent, onBack }) {
   const sendMessage = async () => {
     const hasText = input.trim().length > 0;
     const hasFiles = attachedFiles.length > 0;
-    if ((!hasText && !hasFiles) || sending || !activeConv) return;
+    if ((!hasText && !hasFiles) || sending || !agentId || !activeConv?.id) return;
 
     const msgText = input.trim() || '(File attachment)';
     setInput('');
@@ -470,15 +483,20 @@ function AgentChat({ agent, onBack }) {
     setMessages(prev => [...prev, tempMsg]);
 
     try {
-      const res = await agentsAPI.sendMessage(agent.id, activeConv.id, {
+      const res = await agentsAPI.sendMessage(agentId, activeConv.id, {
         content: msgText,
         files: uploadedFiles,
       });
 
-      // Show the agent message with typing animation
-      const agentMsg = res.data.agentMessage;
+      // The API must return both persisted messages. Fail clearly instead of
+      // dereferencing an undefined AI message and crashing the whole page.
+      const userMessage = res.data?.userMessage;
+      const agentMsg = res.data?.agentMessage;
+      if (!userMessage?.id || !agentMsg?.id) {
+        throw new Error('AI response was incomplete. Please try again.');
+      }
       const agentMsgWithStream = { ...agentMsg, _isStreaming: true };
-      setMessages(prev => [...prev.filter(m => m.id !== tempMsg.id), res.data.userMessage, agentMsgWithStream]);
+      setMessages(prev => [...prev.filter(m => m.id !== tempMsg.id), userMessage, agentMsgWithStream]);
       setStreamingMsgId(agentMsg.id);
       scrollToBottom();
       fetchConversations();
@@ -575,9 +593,9 @@ function AgentChat({ agent, onBack }) {
               <p className="text-[10px] text-[#a6967e] mt-1">Ask {agent.name} anything</p>
             </div>
           ) : (
-            messages.map((msg) => (
-              <ChatMessage key={msg.id} msg={msg} agent={agent}
-                isTyping={msg.id === streamingMsgId && msg._isStreaming} />
+            messages.map((msg, index) => (
+              <ChatMessage key={msg.id || `message-${index}`} msg={msg} agent={agent}
+                isTyping={Boolean(msg.id) && msg.id === streamingMsgId && msg._isStreaming} />
             ))
           )}
 
@@ -687,12 +705,12 @@ export default function MyAgents() {
     setLoading(true);
     try {
       const res = await agentsAPI.list();
-      const all = res.data.agents || [];
+      const all = Array.isArray(res?.data) ? res.data : Array.isArray(res?.data?.agents) ? res.data.agents : [];
       setAgents(all);
       setMainAgents(all.filter(a => !a.parent_agent_id));
       setSubAgents(all.filter(a => a.parent_agent_id));
     } catch (err) {
-      const errMsg = err?.response?.data?.error || 'Failed to load agents';
+      const errMsg = err?.response?.data?.error || err?.response?.data?.detail || err?.message || 'Failed to load agents';
       toast?.error?.(errMsg, { title: 'Error' });
     } finally { setLoading(false); }
   };

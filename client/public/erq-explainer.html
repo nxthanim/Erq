@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Erq — Ethiopia's Freelance Marketplace (Explainer)</title>
+<style>
+  :root {
+    --ink: #17191c;
+    --peach: #fbe1d1;
+    --peach-deep: #f3c9ae;
+    --sienna: #5d2a1a;
+    --paper: #ffffff;
+    --mist: #777b86;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; background: #0e0f11; overflow: hidden; }
+  body { display: flex; align-items: center; justify-content: center; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+
+  #stage {
+    position: relative;
+    width: 1280px;
+    height: 800px;
+    background: var(--ink);
+    overflow: hidden;
+    border-radius: 4px;
+    box-shadow: 0 40px 120px rgba(0,0,0,0.7);
+  }
+
+  /* ---------- Scene base ---------- */
+  .scene { position: absolute; inset: 0; opacity: 0; pointer-events: none; }
+  .scene.active { opacity: 1; }
+  .scene .bg-glow { position: absolute; border-radius: 50%; filter: blur(90px); }
+
+  /* ---------- Typography ---------- */
+  .kicker {
+    font-size: 17px; letter-spacing: 0.35em; text-transform: uppercase;
+    color: var(--peach); font-weight: 600;
+  }
+  .title {
+    font-size: 72px; font-weight: 700; line-height: 1.05; letter-spacing: -2px;
+    color: #ffffff;
+  }
+  .title em { font-style: italic; color: var(--peach); font-weight: 600; }
+  .sub { font-size: 22px; color: rgba(255,255,255,0.72); line-height: 1.5; max-width: 620px; }
+  .card-title { font-size: 26px; font-weight: 600; color: var(--ink); }
+  .card-sub { font-size: 15px; color: var(--mist); line-height: 1.5; }
+
+  /* ---------- Layout helpers ---------- */
+  .col { display: flex; flex-direction: column; justify-content: center; padding: 80px; height: 100%; position: relative; z-index: 2; }
+  .row-scene { display: flex; height: 100%; position: relative; z-index: 2; }
+  .half { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 80px 60px; }
+  .stack { display: flex; flex-direction: column; gap: 26px; }
+
+  /* ---------- Cards / chips ---------- */
+  .chip {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14);
+    color: #fff; padding: 12px 20px; border-radius: 999px; font-size: 17px;
+  }
+  .white-card {
+    background: var(--paper); border-radius: 22px; padding: 22px 26px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+  }
+  .peach-card { background: var(--peach); border-radius: 22px; padding: 22px 26px; }
+  .feature { display: flex; gap: 16px; align-items: flex-start; }
+  .feature .icon {
+    width: 52px; height: 52px; border-radius: 16px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--peach); color: var(--sienna); font-size: 24px;
+  }
+  .sienna-btn {
+    display: inline-flex; align-items: center; gap: 12px;
+    background: var(--peach); color: var(--sienna); font-weight: 600;
+    font-size: 19px; padding: 16px 34px; border-radius: 999px; align-self: flex-start;
+  }
+
+  /* ---------- Bars / charts ---------- */
+  .bar-row { display: flex; align-items: center; gap: 16px; }
+  .bar-track { flex: 1; height: 14px; border-radius: 999px; background: rgba(23,25,28,0.08); overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--sienna), var(--peach-deep)); width: 0; }
+
+  /* ---------- Logos row ---------- */
+  .logos { display: flex; gap: 34px; align-items: center; }
+  .logos span { font-size: 22px; font-weight: 700; color: var(--mist); letter-spacing: -0.5px; opacity: 0.8; }
+
+  /* ---------- Coin / money ---------- */
+  .coin {
+    width: 96px; height: 96px; border-radius: 50%; background: linear-gradient(135deg, #ffd98a, #f2a93b);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 40px; font-weight: 800; color: #7a4d00;
+    box-shadow: 0 14px 40px rgba(242,169,59,0.5);
+  }
+
+  /* ---------- Controls ---------- */
+  #controls {
+    position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 12px; z-index: 100;
+  }
+  #controls button {
+    background: rgba(255,255,255,0.14); color: #fff; border: 1px solid rgba(255,255,255,0.25);
+    padding: 12px 26px; border-radius: 999px; font-size: 15px; font-weight: 600; cursor: pointer;
+    backdrop-filter: blur(8px); transition: all 0.2s;
+  }
+  #controls button:hover { background: rgba(255,255,255,0.25); }
+  #controls button.primary { background: var(--peach); color: var(--sienna); border-color: transparent; }
+  #scene-count { position: fixed; bottom: 30px; right: 30px; color: rgba(255,255,255,0.5); font-size: 14px; z-index: 100; }
+
+  /* ---------- Animation keyframes ---------- */
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes popIn { 0% { opacity: 0; transform: scale(0.6); } 70% { transform: scale(1.06); } 100% { opacity: 1; transform: scale(1); } }
+  @keyframes slideRight { from { opacity: 0; transform: translateX(-40px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes slideLeft { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+  @keyframes growBar { from { width: 0; } to { width: var(--w); } }
+  @keyframes spinSlow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+  @keyframes marquee { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
+
+  .a-fadeUp { animation: fadeUp 0.8s cubic-bezier(.2,.7,.3,1) both; }
+  .a-fadeIn { animation: fadeIn 0.7s ease both; }
+  .a-popIn { animation: popIn 0.7s cubic-bezier(.2,.7,.3,1) both; }
+  .a-slideRight { animation: slideRight 0.8s cubic-bezier(.2,.7,.3,1) both; }
+  .a-slideLeft { animation: slideLeft 0.8s cubic-bezier(.2,.7,.3,1) both; }
+  .a-floaty { animation: floaty 4s ease-in-out infinite; }
+  .a-growBar { animation: growBar 1.4s cubic-bezier(.2,.7,.3,1) both; }
+  .a-spinSlow { animation: spinSlow 14s linear infinite; }
+  .a-pulse { animation: pulse 2.4s ease-in-out infinite; }
+
+  .d1 { animation-delay: 0.15s; } .d2 { animation-delay: 0.3s; } .d3 { animation-delay: 0.45s; }
+  .d4 { animation-delay: 0.6s; } .d5 { animation-delay: 0.75s; } .d6 { animation-delay: 0.9s; }
+  .d7 { animation-delay: 1.05s; } .d8 { animation-delay: 1.2s; }
+
+  /* Hidden until narration plays (captions) */
+  #captions {
+    position: absolute; left: 0; right: 0; bottom: 60px; text-align: center; z-index: 50;
+    font-size: 24px; font-weight: 500; color: #ffffff; text-shadow: 0 2px 12px rgba(0,0,0,0.8);
+    opacity: 0; transition: opacity 0.3s; pointer-events: none;
+  }
+  #captions.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div id="stage">
+
+  <!-- ===== SCENE 1 — Intro ===== -->
+  <div class="scene" id="scene-0">
+    <div class="bg-glow" style="width:600px;height:600px;background:rgba(251,225,209,0.16);top:-150px;right:-150px;"></div>
+    <div class="bg-glow" style="width:500px;height:500px;background:rgba(93,42,26,0.3);bottom:-180px;left:-120px;"></div>
+    <div class="col" style="align-items:center;text-align:center;">
+      <div class="a-popIn" style="width:120px;height:120px;border-radius:30px;background:#fff;display:flex;align-items:center;justify-content:center;margin-bottom:34px;box-shadow:0 24px 70px rgba(0,0,0,0.5);">
+        <div style="font-size:64px;font-weight:800;color:var(--sienna);font-style:italic;">E</div>
+      </div>
+      <p class="kicker a-fadeUp d1" style="margin-bottom:16px;">Ethiopia's freelance marketplace</p>
+      <h1 class="title a-fadeUp d2">Find the perfect <em>freelance</em><br/>services for your business</h1>
+      <p class="sub a-fadeUp d3" style="margin-top:26px;">Hire top Ethiopian talent. Sell your skills. Get paid securely. All in one place.</p>
+      <div class="a-fadeUp d5" style="margin-top:40px;display:flex;gap:14px;">
+        <span class="chip">🌍 Made for Ethiopia</span>
+        <span class="chip">🔒 TeleBirr escrow</span>
+        <span class="chip">⚡ Instant payouts</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SCENE 2 — The problem ===== -->
+  <div class="scene" id="scene-1">
+    <div class="bg-glow" style="width:500px;height:500px;background:rgba(185,28,28,0.14);top:-100px;left:-100px;"></div>
+    <div class="row-scene">
+      <div class="half">
+        <p class="kicker a-fadeUp" style="margin-bottom:14px;">The problem</p>
+        <h1 class="title a-fadeUp d1" style="font-size:60px;">Finding talent in Ethiopia <em>shouldn't be this hard</em></h1>
+        <div class="stack" style="margin-top:40px;">
+          <div class="feature a-slideRight d2"><div class="icon">😕</div><div><p class="card-title">Scattered &amp; unsafe</p><p class="card-sub">Freelancers on Facebook groups — no reviews, no protection, no guarantee of payment.</p></div></div>
+          <div class="feature a-slideRight d3"><div class="icon">💸</div><div><p class="card-title">Payment barriers</p><p class="card-sub">International platforms don't support TeleBirr, Chapa or local bank transfers.</p></div></div>
+          <div class="feature a-slideRight d4"><div class="icon">📉</div><div><p class="card-title">No trust layer</p><p class="card-sub">You pay first, then pray. Freelancers wait months to get paid.</p></div></div>
+        </div>
+      </div>
+      <div class="half" style="align-items:center;justify-content:center;">
+        <div class="a-floaty" style="font-size:200px;line-height:1;">🧩</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SCENE 3 — The solution ===== -->
+  <div class="scene" id="scene-2">
+    <div class="bg-glow" style="width:600px;height:600px;background:rgba(251,225,209,0.14);bottom:-150px;right:-120px;"></div>
+    <div class="col" style="align-items:center;text-align:center;">
+      <p class="kicker a-fadeUp" style="margin-bottom:14px;">The solution</p>
+      <h1 class="title a-fadeUp d1">Meet <em>Erq</em></h1>
+      <p class="sub a-fadeUp d2" style="margin-top:24px;">The all-in-one marketplace where Ethiopian businesses hire freelancers, and freelancers build real careers.</p>
+      <div class="row-scene" style="width:100%;gap:22px;margin-top:50px;flex:none;">
+        <div class="white-card a-popIn d3" style="flex:1;text-align:left;">
+          <div style="font-size:40px;margin-bottom:10px;">🛒</div>
+          <p class="card-title">For Businesses</p>
+          <p class="card-sub" style="margin-top:6px;">Post jobs, browse gigs, hire vetted talent and pay only when you're happy.</p>
+        </div>
+        <div class="white-card a-popIn d4" style="flex:1;text-align:left;">
+          <div style="font-size:40px;margin-bottom:10px;">🚀</div>
+          <p class="card-title">For Freelancers</p>
+          <p class="card-sub" style="margin-top:6px;">Create gigs, get tips, receive instant payouts to TeleBirr or Chapa.</p>
+        </div>
+        <div class="white-card a-popIn d5" style="flex:1;text-align:left;">
+          <div style="font-size:40px;margin-bottom:10px;">🤖</div>
+          <p class="card-title">AI-Powered</p>
+          <p class="card-sub" style="margin-top:6px;">AI gig suggestions, logo maker and smart matching built in.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SCENE 4 — Marketplace ===== -->
+  <div class="scene" id="scene-3">
+    <div class="bg-glow" style="width:550px;height:550px;background:rgba(93,42,26,0.25);top:-120px;right:-140px;"></div>
+    <div class="row-scene">
+      <div class="half">
+        <p class="kicker a-fadeUp" style="margin-bottom:14px;">A world of talent</p>
+        <h1 class="title a-fadeUp d1" style="font-size:58px;">10 categories.<br/>Thousands of <em>gigs.</em></h1>
+        <div class="logos a-fadeUp d3" style="margin-top:40px;flex-wrap:wrap;gap:14px;">
+          <span>🎨 Graphics</span><span>📈 Marketing</span><span>✍️ Writing</span>
+          <span>🎬 Video</span><span>💻 Programming</span><span>📷 Photography</span>
+        </div>
+        <p class="sub a-fadeUp d4" style="margin-top:30px;">From logo design to full-stack development — search, compare reviews, and hire in minutes.</p>
+      </div>
+      <div class="half" style="gap:18px;justify-content:center;">
+        <div class="white-card a-slideRight d2"><div style="display:flex;justify-content:space-between;align-items:center;"><div><p class="card-title" style="font-size:20px;">Logo Design</p><p class="card-sub" style="font-size:13px;">by Sara A. ⭐ 4.9</p></div><span style="font-weight:800;color:var(--sienna);font-size:20px;">ETB 1,500</span></div></div>
+        <div class="white-card a-slideRight d3"><div style="display:flex;justify-content:space-between;align-items:center;"><div><p class="card-title" style="font-size:20px;">Website Development</p><p class="card-sub" style="font-size:13px;">by Dawit K. ⭐ 5.0</p></div><span style="font-weight:800;color:var(--sienna);font-size:20px;">ETB 25,000</span></div></div>
+        <div class="white-card a-slideRight d4"><div style="display:flex;justify-content:space-between;align-items:center;"><div><p class="card-title" style="font-size:20px;">Amharic Translation</p><p class="card-sub" style="font-size:13px;">by Tigist M. ⭐ 4.8</p></div><span style="font-weight:800;color:var(--sienna);font-size:20px;">ETB 2,400</span></div></div>
+        <div class="peach-card a-slideRight d5" style="display:flex;align-items:center;gap:14px;">
+          <div style="width:44px;height:44px;border-radius:14px;background:var(--sienna);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;">🔍</div>
+          <div><p class="card-title" style="font-size:16px;">Search any service</p><p class="card-sub" style="font-size:12px;">Smart filters by category, budget &amp; rating</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SCENE 5 — Escrow / trust ===== -->
+  <div class="scene" id="scene-4">
+    <div class="bg-glow" style="width:500px;height:500px;background:rgba(251,225,209,0.13);bottom:-140px;left:-120px;"></div>
+    <div class="col" style="align-items:center;text-align:center;">
+      <p class="kicker a-fadeUp" style="margin-bottom:14px;">Protected payments</p>
+      <h1 class="title a-fadeUp d1" style="font-size:58px;">Your money is <em>safe</em>, every time</h1>
+      <p class="sub a-fadeUp d2" style="margin-top:24px;">Erq holds your payment in escrow until you approve the work. No release, no pay — it's that simple.</p>
+      <div class="row-scene" style="width:100%;max-width:980px;margin-top:54px;align-items:center;gap:0;">
+        <div class="half" style="padding:20px;align-items:center;">
+          <div class="white-card a-popIn d3" style="text-align:center;padding:30px;">
+            <p style="font-size:15px;color:var(--mist);margin-bottom:12px;">You pay</p>
+            <div style="display:flex;align-items:center;justify-content:center;gap:16px;">
+              <div class="coin a-floaty">ETB</div>
+            </div>
+            <p style="font-size:14px;color:var(--mist);margin-top:12px;">Held securely by Erq</p>
+          </div>
+        </div>
+        <div style="font-size:44px;color:var(--peach);font-weight:800;padding:0 10px;">→</div>
+        <div class="half" style="padding:20px;align-items:center;">
+          <div class="white-card a-popIn d4" style="text-align:center;padding:30px;">
+            <p style="font-size:15px;color:var(--mist);margin-bottom:12px;">You approve</p>
+            <div style="display:flex;align-items:center;justify-content:center;gap:16px;">
+              <div style="width:64px;height:64px;border-radius:50%;background:#d1fae5;display:flex;align-items:center;justify-content:center;font-size:30px;">✅</div>
+            </div>
+            <p style="font-size:14px;color:var(--mist);margin-top:12px;">Freelancer gets paid instantly</p>
+          </div>
+        </div>
+      </div>
+      <div class="stack" style="margin-top:36px;align-items:center;">
+        <span class="chip a-fadeUp d5" style="font-size:16px;">🔐 TeleBirr &amp; Chapa supported · disputes resolved by our team</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SCENE 6 — Earnings ===== -->
+  <div class="scene" id="scene-5">
+    <div class="bg-glow" style="width:600px;height:600px;background:rgba(93,42,26,0.3);top:-140px;left:-100px;"></div>
+    <div class="row-scene">
+      <div class="half">
+        <p class="kicker a-fadeUp" style="margin-bottom:14px;">Build your income</p>
+        <h1 class="title a-fadeUp d1" style="font-size:58px;">Sell. Get tips.<br/>Earn <em>every month.</em></h1>
+        <div class="stack" style="margin-top:38px;">
+          <div class="feature a-slideRight d2"><div class="icon">🛍️</div><div><p class="card-title">Sell gigs &amp; products</p><p class="card-sub">List services, digital products and get hired.</p></div></div>
+          <div class="feature a-slideRight d3"><div class="icon">☕</div><div><p class="card-title">Creator tips</p><p class="card-sub">Supporters can buy you a coffee — directly to your wallet.</p></div></div>
+          <div class="feature a-slideRight d4"><div class="icon">📊</div><div><p class="card-title">Live analytics</p><p class="card-sub">Track earnings, orders and growth on your dashboard.</p></div></div>
+        </div>
+      </div>
+      <div class="half" style="gap:20px;justify-content:center;">
+        <div class="white-card a-slideLeft d2">
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><p class="card-sub" style="font-size:13px;">Total earned</p><p style="font-weight:800;color:var(--sienna);">ETB 48,500</p></div>
+          <div class="bar-row"><div class="bar-track"><div class="bar-fill a-growBar" style="--w:85%;"></div></div><span style="font-size:13px;color:var(--mist);width:42px;">85%</span></div>
+        </div>
+        <div class="white-card a-slideLeft d3">
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><p class="card-sub" style="font-size:13px;">Orders completed</p><p style="font-weight:800;color:var(--sienna);">124</p></div>
+          <div class="bar-row"><div class="bar-track"><div class="bar-fill a-growBar" style="--w:62%;"></div></div><span style="font-size:13px;color:var(--mist);width:42px;">62%</span></div>
+        </div>
+        <div class="white-card a-slideLeft d4">
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><p class="card-sub" style="font-size:13px;">Client rating</p><p style="font-weight:800;color:var(--sienna);">4.9 ★</p></div>
+          <div class="bar-row"><div class="bar-track"><div class="bar-fill a-growBar" style="--w:98%;"></div></div><span style="font-size:13px;color:var(--mist);width:42px;">98%</span></div>
+        </div>
+        <div class="peach-card a-slideLeft d5" style="display:flex;align-items:center;gap:16px;">
+          <div style="font-size:30px;">⚡</div>
+          <div><p class="card-title" style="font-size:17px;">Instant payouts</p><p class="card-sub" style="font-size:12px;">Withdraw to TeleBirr / Chapa — in minutes, not weeks.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SCENE 7 — Community / stats ===== -->
+  <div class="scene" id="scene-6">
+    <div class="bg-glow" style="width:500px;height:500px;background:rgba(251,225,209,0.15);bottom:-120px;right:-100px;"></div>
+    <div class="col" style="align-items:center;text-align:center;">
+      <p class="kicker a-fadeUp" style="margin-bottom:14px;">A growing community</p>
+      <h1 class="title a-fadeUp d1">Ethiopia's creators <em>choose Erq</em></h1>
+      <div class="row-scene" style="width:100%;max-width:1000px;margin-top:54px;gap:22px;flex:none;">
+        <div class="peach-card a-popIn d2" style="flex:1;text-align:center;">
+          <p style="font-size:56px;font-weight:800;color:var(--sienna);">40K+</p>
+          <p class="card-sub" style="font-size:15px;margin-top:6px;">Active creators earning today</p>
+        </div>
+        <div class="white-card a-popIn d3" style="flex:1;text-align:center;">
+          <p style="font-size:56px;font-weight:800;color:var(--sienna);">ETB 1M+</p>
+          <p class="card-sub" style="font-size:15px;margin-top:6px;">Paid out to freelancers</p>
+        </div>
+        <div class="white-card a-popIn d4" style="flex:1;text-align:center;">
+          <p style="font-size:56px;font-weight:800;color:var(--sienna);">10K+</p>
+          <p class="card-sub" style="font-size:15px;margin-top:6px;">Services &amp; products sold</p>
+        </div>
+      </div>
+      <p class="sub a-fadeUp d5" style="margin-top:44px;">Free to start. No monthly fees. Built for Ethiopia, by Ethiopians.</p>
+    </div>
+  </div>
+
+  <!-- ===== SCENE 8 — CTA / Outro ===== -->
+  <div class="scene" id="scene-7">
+    <div class="bg-glow" style="width:650px;height:650px;background:rgba(251,225,209,0.18);top:-160px;right:-160px;"></div>
+    <div class="bg-glow" style="width:500px;height:500px;background:rgba(93,42,26,0.35);bottom:-150px;left:-100px;"></div>
+    <div class="col" style="align-items:center;text-align:center;">
+      <div class="a-popIn" style="width:110px;height:110px;border-radius:28px;background:#fff;display:flex;align-items:center;justify-content:center;margin-bottom:30px;box-shadow:0 24px 70px rgba(0,0,0,0.5);">
+        <div style="font-size:58px;font-weight:800;color:var(--sienna);font-style:italic;">E</div>
+      </div>
+      <h1 class="title a-fadeUp d1" style="font-size:64px;">Ready to <em>start earning?</em></h1>
+      <p class="sub a-fadeUp d2" style="margin-top:22px;">Join thousands of freelancers and businesses across Ethiopia.</p>
+      <div class="a-fadeUp d4" style="margin-top:40px;display:flex;gap:16px;">
+        <span class="sienna-btn a-pulse">Join Erq free →</span>
+      </div>
+      <p class="kicker a-fadeUp d5" style="margin-top:40px;">erq.et · Ethiopia's freelance marketplace</p>
+    </div>
+  </div>
+
+  <div id="captions"></div>
+</div>
+
+<div id="scene-count">Scene 1 / 8</div>
+<div id="controls">
+  <button id="btn-restart">↺ Replay</button>
+  <button id="btn-prev">◀ Prev</button>
+  <button id="btn-play" class="primary">▶ Play</button>
+  <button id="btn-next">Next ▶</button>
+  <button id="btn-captions">💬 Captions</button>
+  <button id="btn-record">⏺ Record</button>
+</div>
+
+<script>
+const SCENES = [
+  { dur: 8000, caption: 'Erq — Ethiopia\'s freelance marketplace. Find the perfect freelance services for your business.' },
+  { dur: 8000, caption: 'The problem: scattered, unsafe hiring. No reviews. No payment protection. No TeleBirr.' },
+  { dur: 8000, caption: 'Meet Erq — the all-in-one marketplace for businesses and freelancers.' },
+  { dur: 8000, caption: 'Ten categories. Thousands of gigs. From logo design to programming.' },
+  { dur: 8000, caption: 'Your money is safe. Erq holds payments in escrow until you approve the work.' },
+  { dur: 8000, caption: 'Sell gigs, receive tips, and track your earnings on your dashboard.' },
+  { dur: 8000, caption: 'Forty thousand creators. Over a million birr paid out. A growing community.' },
+  { dur: 9000, caption: 'Ready to start earning? Join Erq free today.' },
+];
+
+let idx = 0;
+let playing = false;
+let timer = null;
+let captionsOn = false;
+let voice = null;
+let narrationOn = false;
+
+const stage = document.getElementById('stage');
+const captionsEl = document.getElementById('captions');
+const countEl = document.getElementById('scene-count');
+
+function showScene(i, autoplayAnimations = true) {
+  idx = (i + SCENES.length) % SCENES.length;
+  document.querySelectorAll('.scene').forEach((s, j) => {
+    s.classList.remove('active');
+    s.style.opacity = 0;
+  });
+  const scene = document.getElementById('scene-' + idx);
+  scene.style.opacity = 1;
+  // Restart CSS animations
+  scene.querySelectorAll('.a-fadeUp,.a-fadeIn,.a-popIn,.a-slideRight,.a-slideLeft,.a-growBar').forEach(el => {
+    el.style.animation = 'none';
+    void el.offsetWidth;
+    el.style.animation = '';
+  });
+  scene.classList.add('active');
+  countEl.textContent = 'Scene ' + (idx + 1) + ' / ' + SCENES.length;
+  updateCaption();
+}
+
+function updateCaption() {
+  if (captionsOn) {
+    captionsEl.textContent = SCENES[idx].caption;
+    captionsEl.classList.add('show');
+  } else {
+    captionsEl.classList.remove('show');
+  }
+}
+
+function startAuto() {
+  stopAuto();
+  playing = true;
+  document.getElementById('btn-play').textContent = '⏸ Pause';
+  stepTimer();
+}
+
+function stepTimer() {
+  clearTimeout(timer);
+  timer = setTimeout(() => {
+    showScene(idx + 1);
+    stepTimer();
+  }, SCENES[idx].dur);
+}
+
+function stopAuto() {
+  clearTimeout(timer);
+  playing = false;
+  document.getElementById('btn-play').textContent = '▶ Play';
+}
+
+document.getElementById('btn-play').onclick = () => (playing ? stopAuto() : startAuto());
+document.getElementById('btn-prev').onclick = () => { stopAuto(); showScene(idx - 1); };
+document.getElementById('btn-next').onclick = () => { stopAuto(); showScene(idx + 1); };
+document.getElementById('btn-restart').onclick = () => { stopAuto(); showScene(0); startAuto(); };
+document.getElementById('btn-captions').onclick = () => { captionsOn = !captionsOn; updateCaption(); document.getElementById('btn-captions').style.opacity = captionsOn ? 1 : 0.6; };
+
+// Narration (Web Speech API)
+function speakScene() {
+  if (!('speechSynthesis' in window)) return;
+  const text = SCENES[idx].caption;
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 1.0; u.pitch = 1.0;
+  if (voice) u.voice = voice;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(u);
+}
+document.getElementById('btn-record').onclick = () => {
+  if (narrationOn) {
+    speechSynthesis.cancel(); narrationOn = false;
+    document.getElementById('btn-record').textContent = '⏺ Record';
+    document.getElementById('btn-record').style.opacity = 0.6;
+  } else {
+    speechSynthesis.getVoices(); // warm up
+    speakScene();
+    narrationOn = true;
+    document.getElementById('btn-record').textContent = '⏹ Stop';
+    document.getElementById('btn-record').style.opacity = 1;
+  }
+};
+
+// Keyboard nav
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight') { stopAuto(); showScene(idx + 1); }
+  if (e.key === 'ArrowLeft') { stopAuto(); showScene(idx - 1); }
+  if (e.key === ' ') { e.preventDefault(); playing ? stopAuto() : startAuto(); }
+  if (e.key === 'r' || e.key === 'R') { stopAuto(); showScene(0); startAuto(); }
+});
+
+showScene(0);
+startAuto();
+</script>
+</body>
+</html>

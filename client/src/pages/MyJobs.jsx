@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { RefreshCw, Eye, Download, File, Image, Film, Music, FileText, Archive, XCircle, Package, Clock, User, AlertTriangle } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
@@ -27,10 +27,10 @@ function formatFileSize(bytes) {
 }
 
 const statusConfig = {
-  open: { label: 'Open', color: '#5d2a1a', bg: 'rgba(251,225,209,0.3)', icon: Clock },
-  in_progress: { label: 'In Progress', color: '#5d2a1a', bg: 'rgba(93,42,26,0.08)', icon: Clock },
-  delivered: { label: 'Delivered', color: '#5d2a1a', bg: 'rgba(93,42,26,0.08)', icon: Package },
-  completed: { label: 'Completed', color: '#5d2a1a', bg: 'rgba(93,42,26,0.08)', icon: Package },
+  open: { label: 'Open', color: '#1f6f5c', bg: 'rgba(251,225,209,0.3)', icon: Clock },
+  in_progress: { label: 'In Progress', color: '#1f6f5c', bg: 'rgba(93,42,26,0.08)', icon: Clock },
+  delivered: { label: 'Delivered', color: '#1f6f5c', bg: 'rgba(93,42,26,0.08)', icon: Package },
+  completed: { label: 'Completed', color: '#1f6f5c', bg: 'rgba(93,42,26,0.08)', icon: Package },
   cancelled: { label: 'Cancelled', color: '#777b86', bg: '#f2f2f3', icon: AlertTriangle },
 };
 // statusConfig kept for backward compat - use OrderStatusChip for new code
@@ -63,14 +63,14 @@ function JobFileViewerModal({ delivery, onClose }) {
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-5">
-          <h3 className="text-lg font-semibold" style={{ color: '#17191c' }}>Delivered Files</h3>
+          <h3 className="text-lg font-semibold" style={{ color: '#173a32' }}>Delivered Files</h3>
           <button onClick={onClose} style={{ color: '#777b86' }} className="p-1 rounded-lg hover:bg-gray-50">
             <XCircle size={20} />
           </button>
         </div>
         {delivery.message && (
           <div className="mb-4 p-4 rounded-2xl" style={{ backgroundColor: '#fafafb' }}>
-            <p style={{ color: '#17191c', fontSize: '14px' }}>{delivery.message}</p>
+            <p style={{ color: '#173a32', fontSize: '14px' }}>{delivery.message}</p>
           </div>
         )}
         <div className="space-y-3 max-h-96 overflow-y-auto">
@@ -79,15 +79,15 @@ function JobFileViewerModal({ delivery, onClose }) {
             return (
               <div key={i} className="p-4 rounded-2xl" style={{ backgroundColor: '#f2f2f3' }}>
                 <div className="flex items-start gap-3 mb-3">
-                  <Icon size={20} style={{ color: '#5d2a1a' }} />
+                  <Icon size={20} style={{ color: '#1f6f5c' }} />
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate" style={{ color: '#17191c' }}>{file.name}</p>
+                    <p className="font-medium text-sm truncate" style={{ color: '#173a32' }}>{file.name}</p>
                     <p style={{ color: '#979799', fontSize: '12px' }}>{formatFileSize(file.size)}</p>
                   </div>
                   {(file.data || file.url) && (
                     <a href={file.data || file.url} download={file.name}
                       className="p-2 rounded-xl transition-all" style={{ backgroundColor: '#ffffff' }}>
-                      <Download size={16} style={{ color: '#17191c' }} />
+                      <Download size={16} style={{ color: '#173a32' }} />
                     </a>
                   )}
                 </div>
@@ -155,7 +155,7 @@ export default function MyJobs() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#17191c]/20 border-t-[#17191c]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#173a32]/20 border-t-[#173a32]"></div>
       </div>
     );
   }
@@ -166,7 +166,7 @@ export default function MyJobs() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-[44px] leading-tight tracking-[-0.66px] mb-2"
-              style={{ fontFamily: 'var(--font-signifier)', fontWeight: 400, color: '#17191c' }}>
+              style={{ fontFamily: 'var(--font-signifier)', fontWeight: 400, color: '#173a32' }}>
               My Jobs
             </h1>
             <p style={{ color: '#777b86', fontSize: '17px' }}>Manage your job postings</p>
@@ -181,7 +181,7 @@ export default function MyJobs() {
             </button>
             <Link to="/post-job"
               className="inline-flex items-center gap-2 py-2.5 px-5 rounded-full text-sm font-semibold transition-all"
-              style={{ backgroundColor: '#17191c', color: '#ffffff' }}>
+              style={{ backgroundColor: '#173a32', color: '#ffffff' }}>
               Post a Job
             </Link>
           </div>
@@ -192,13 +192,13 @@ export default function MyJobs() {
             <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style={{ backgroundColor: '#f2f2f3' }}>
               <Package size={32} style={{ color: '#979799' }} />
             </div>
-            <h3 className="text-xl font-semibold mb-2" style={{ color: '#17191c' }}>No jobs yet</h3>
+            <h3 className="text-xl font-semibold mb-2" style={{ color: '#173a32' }}>No jobs yet</h3>
             <p style={{ color: '#777b86', fontSize: '15px' }} className="mb-6">
               Post your first job and start receiving bids from freelancers.
             </p>
             <Link to="/post-job"
               className="inline-flex items-center gap-2 py-3 px-6 rounded-full text-sm font-semibold transition-all"
-              style={{ backgroundColor: '#17191c', color: '#ffffff' }}>
+              style={{ backgroundColor: '#173a32', color: '#ffffff' }}>
               Post a Job
             </Link>
           </div>
@@ -218,14 +218,14 @@ export default function MyJobs() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2">
                           {job.category && (
-                            <span className="px-2.5 py-1 rounded-full text-[11px]" style={{ backgroundColor: 'rgba(93,42,26,0.08)', color: '#5d2a1a' }}>
+                            <span className="px-2.5 py-1 rounded-full text-[11px]" style={{ backgroundColor: 'rgba(93,42,26,0.08)', color: '#1f6f5c' }}>
                               {job.category}
                             </span>
                           )}
                           <OrderStatusChip status={job.status} size="sm" />
                           <span style={{ color: '#979799', fontSize: '11px' }}>{job.bid_count} bids</span>
                         </div>
-                        <h3 className="font-semibold" style={{ color: '#17191c' }}>{job.title}</h3>
+                        <h3 className="font-semibold" style={{ color: '#173a32' }}>{job.title}</h3>
                         <p className="text-sm mt-1 line-clamp-1" style={{ color: '#777b86' }}>{job.description}</p>
                         <div className="flex items-center gap-3 mt-2 text-xs" style={{ color: '#777b86' }}>
                           <span className="flex items-center gap-1"><Clock size={12} /> Posted {new Date(job.created_at).toLocaleDateString()}</span>
@@ -235,7 +235,7 @@ export default function MyJobs() {
                         </div>
                       </div>
                       <div className="text-right shrink-0 ml-4">
-                        <p className="text-lg font-bold" style={{ color: '#5d2a1a' }}>
+                        <p className="text-lg font-bold" style={{ color: '#1f6f5c' }}>
                           ETB {job.budget_min?.toLocaleString()} - {job.budget_max?.toLocaleString()}
                         </p>
                       </div>
@@ -254,7 +254,7 @@ export default function MyJobs() {
                     {job.status === 'delivered' && job.has_delivery && (
                       <button onClick={(e) => { e.preventDefault(); handleViewFiles(job); }}
                         className="inline-flex items-center gap-1.5 py-2 px-4 rounded-full text-xs font-semibold transition-all"
-                        style={{ backgroundColor: 'rgba(93,42,26,0.08)', color: '#5d2a1a' }}>
+                        style={{ backgroundColor: 'rgba(93,42,26,0.08)', color: '#1f6f5c' }}>
                         <Eye size={12} /> View Delivered Files ({job.delivery_file_count || 0})
                       </button>
                     )}
@@ -262,7 +262,7 @@ export default function MyJobs() {
                     {job.status === 'delivered' && (
                       <Link to={`/jobs/${job.id}`}
                         className="inline-flex items-center gap-1.5 py-2 px-4 rounded-full text-xs font-semibold transition-all"
-                        style={{ backgroundColor: '#17191c', color: '#ffffff' }}>
+                        style={{ backgroundColor: '#173a32', color: '#ffffff' }}>
                         Approve & Complete
                       </Link>
                     )}

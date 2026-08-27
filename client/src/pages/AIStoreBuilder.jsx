@@ -1,504 +1,146 @@
-import { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import api, { gigsAPI } from '../utils/api';
-import { FileText, User, Briefcase, Megaphone, Package, PenTool, Bot, Sparkles, Globe, Palette, MessageCircle, Zap, RefreshCw, Send, Loader, CheckCircle, Clock, Star, ArrowRight, Layout } from 'lucide-react';
-import WebsiteBuilder from '../components/WebsiteBuilder';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { aiAPI } from '../utils/api';
+import {
+  ArrowUpRight, Check, ChevronRight, Code2, Download, Eye, FileText,
+  Globe2, Layers3, Loader, Palette, RefreshCw, ShieldCheck, Sparkles,
+  Type, Upload, WandSparkles, XCircle,
+} from 'lucide-react';
 
-// Pre-made prompt templates
-const promptTemplates = [
-  { name: 'Gig Description', icon: <FileText size={18} />, prompt: 'Write a compelling gig description for a freelance service on Erq marketplace. Make it professional and attractive to Ethiopian clients.' },
-  { name: 'Business Bio', icon: <User size={18} />, prompt: 'Write a professional bio for a freelancer on Gebeya. Highlight skills, experience, and what makes them unique.' },
-  { name: 'Job Post', icon: <Briefcase size={18} />, prompt: 'Create a detailed job posting for a client on Erq marketplace. Include requirements, budget range, and project scope.' },
-  { name: 'Marketing Copy', icon: <Megaphone size={18} />, prompt: 'Write marketing copy promoting Erq marketplace to Ethiopian freelancers and clients.' },
-  { name: 'Service Package', icon: <Package size={18} />, prompt: 'Create a tiered service package (Basic, Standard, Premium) with pricing in ETB for a freelance service.' },
-  { name: 'Cover Letter', icon: <PenTool size={18} />, prompt: 'Write a professional cover letter for a freelancer applying to a job on Erq.' },
+const COLORS = { ink: '#18221f', moss: '#1f6f5c', leaf: '#e8f5ee', cream: '#fbfaf7', line: '#ebe9e3', muted: '#7a817d', gold: '#c58b32' };
+const DEFAULT_BRAND = { primary: '#18221f', secondary: '#c58b32', background: '#fbfaf7', foreground: '#18221f', mood: 'editorial' };
+const DEFAULT_TYPOGRAPHY = { fontFamily: 'manrope', headingFont: 'playfair', typeScale: 'editorial', letterSpacing: 'tight' };
+const FONT_OPTIONS = [
+  { id: 'manrope', label: 'Manrope', css: "'Manrope', ui-sans-serif, system-ui, sans-serif", google: 'Manrope:wght@400;500;600;700;800' },
+  { id: 'inter', label: 'Inter', css: "'Inter', ui-sans-serif, system-ui, sans-serif", google: 'Inter:wght@400;500;600;700;800' },
+  { id: 'dm-sans', label: 'DM Sans', css: "'DM Sans', ui-sans-serif, system-ui, sans-serif", google: 'DM+Sans:wght@400;500;600;700' },
+  { id: 'space-grotesk', label: 'Space Grotesk', css: "'Space Grotesk', ui-sans-serif, system-ui, sans-serif", google: 'Space+Grotesk:wght@400;500;600;700' },
+  { id: 'playfair', label: 'Playfair Display', css: "'Playfair Display', Georgia, serif", google: 'Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600' },
+  { id: 'fraunces', label: 'Fraunces', css: "'Fraunces', Georgia, serif", google: 'Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700' },
+  { id: 'instrument-serif', label: 'Instrument Serif', css: "'Instrument Serif', Georgia, serif", google: 'Instrument+Serif:ital@0;1' },
+  { id: 'lora', label: 'Lora', css: "'Lora', Georgia, serif", google: 'Lora:wght@400;500;600;700' },
+  { id: 'plus-jakarta', label: 'Plus Jakarta Sans', css: "'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif", google: 'Plus+Jakarta+Sans:wght@400;500;600;700;800' },
 ];
+const TYPE_SCALE_OPTIONS = [{ id: 'compact', label: 'Compact' }, { id: 'editorial', label: 'Editorial' }, { id: 'display', label: 'Display' }];
+const LETTER_SPACING_OPTIONS = [{ id: 'tight', label: 'Tight' }, { id: 'balanced', label: 'Balanced' }, { id: 'airy', label: 'Airy' }];
+const START_FORM = { storeName: '', description: '', category: '', portfolioItems: '', products: '', style: 'Editorial, cinematic, premium', brandVoice: 'Confident, human, premium', brandColors: '', fontFamily: 'manrope', headingFont: 'playfair', typeScale: 'editorial', letterSpacing: 'tight', contactEmail: '', socialLinks: '' };
 
-// GLM 5.2 is the only AI model used
-const AI_MODELS = [
-  { index: 0, name: 'z-ai/glm-5.2', label: 'GLM 5.2', desc: 'Primary AI model' },
-];
+function fontCss(id) { return FONT_OPTIONS.find(option => option.id === id)?.css || FONT_OPTIONS[0].css; }
+function fontGoogle(id) { return FONT_OPTIONS.find(option => option.id === id)?.google || FONT_OPTIONS[0].google; }
+function fontLabel(id) { return FONT_OPTIONS.find(option => option.id === id)?.label || FONT_OPTIONS[0].label; }
+const PROGRESS_STAGES = ['Reading your brief', 'Building your brand system', 'Composing the portfolio', 'Polishing responsive details', 'Preparing deployment output'];
+
+function formatETB(value) {
+  const amount = Number(value || 0);
+  return `ETB ${Number.isFinite(amount) ? amount.toLocaleString('en-ET', { maximumFractionDigits: 2 }) : '0'}`;
+}
+
+function escapeHtml(value) {
+  return String(value || '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[char]));
+}
+
+function safeCssColor(value, fallback) {
+  return /^#[0-9a-fA-F]{6}$/.test(value || '') ? value : fallback;
+}
+
+function downloadPortfolio(store) {
+  const brand = store.brand || DEFAULT_BRAND;
+  const typography = store.typography || DEFAULT_TYPOGRAPHY;
+  const bodyFont = fontCss(typography.fontFamily);
+  const headingFont = fontCss(typography.headingFont);
+  const headingSpacing = typography.letterSpacing === 'airy' ? '0.01em' : typography.letterSpacing === 'balanced' ? '-0.025em' : '-0.07em';
+  const headingScale = typography.typeScale === 'compact' ? 'clamp(42px, 7vw, 96px)' : typography.typeScale === 'display' ? 'clamp(58px, 11vw, 156px)' : 'clamp(52px, 10vw, 138px)';
+  const primary = safeCssColor(brand.primary, DEFAULT_BRAND.primary);
+  const secondary = safeCssColor(brand.secondary, DEFAULT_BRAND.secondary);
+  const background = safeCssColor(brand.background, DEFAULT_BRAND.background);
+  const foreground = safeCssColor(brand.foreground, DEFAULT_BRAND.foreground);
+  const projects = (store.projects || []).map((project, index) => `<article class="project ${index === 0 ? 'project-featured' : ''}">${project.imageUrl ? `<img src="${escapeHtml(project.imageUrl)}" alt="${escapeHtml(project.title)}" class="project-image">` : '<div class="project-image project-placeholder"></div>'}<div class="project-copy"><span class="project-index">0${index + 1}</span><h3>${escapeHtml(project.title)}</h3><p>${escapeHtml(project.description)}</p>${project.result ? `<strong>${escapeHtml(project.result)}</strong>` : ''}</div></article>`).join('');
+  const services = (store.services || []).map(service => `<article class="service"><h3>${escapeHtml(service.title)}</h3><p>${escapeHtml(service.description)}</p></article>`).join('');
+  const process = (store.process || []).map(item => `<article class="process"><span>${escapeHtml(item.step)}</span><div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description)}</p></div></article>`).join('');
+  const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="${escapeHtml(store.description)}"><meta name="theme-color" content="${primary}"><title>${escapeHtml(store.title || 'Portfolio')}</title><style>@import url('https://fonts.googleapis.com/css2?family=${fontGoogle(typography.fontFamily)}&family=${fontGoogle(typography.headingFont)}&display=swap');:root{--primary:${primary};--secondary:${secondary};--bg:${background};--fg:${foreground};--line:#ffffff24}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font-family:${bodyFont}}h1,h2,h3,h4{font-family:${headingFont};letter-spacing:${headingSpacing}}a{color:inherit}main{max-width:1320px;margin:auto}.nav{display:flex;justify-content:space-between;align-items:center;padding:28px 6vw}.brand{font-weight:800;letter-spacing:-.04em}.nav a{font-size:13px;text-decoration:none;opacity:.72}.hero{min-height:680px;padding:8vw 6vw;display:flex;align-items:flex-end;position:relative;overflow:hidden;background:radial-gradient(circle at 82% 16%,var(--secondary)55,transparent 28%),linear-gradient(135deg,var(--primary),var(--fg))}.hero:after{content:"";position:absolute;inset:18% -8% -35% 35%;border:1px solid #ffffff30;border-radius:50%;transform:rotate(-12deg)}.hero-inner{position:relative;z-index:1;max-width:820px;color:#fff}.eyebrow{font-size:11px;letter-spacing:.22em;text-transform:uppercase;opacity:.65}.hero h1{font-size:${headingScale};line-height:.9;letter-spacing:-.09em;margin:24px 0}.hero p{font-size:18px;line-height:1.65;max-width:600px;color:#ffffffbf}.button{display:inline-block;margin-top:24px;padding:15px 20px;border-radius:14px;background:var(--secondary);color:var(--fg);font-weight:800;text-decoration:none}.section{padding:96px 6vw}.section-head{display:flex;justify-content:space-between;gap:28px;align-items:end;margin-bottom:36px}.section h2{font-size:clamp(34px,5vw,72px);line-height:.95;letter-spacing:-.07em;margin:0}.muted{color:#6b756f;line-height:1.7}.projects{display:grid;grid-template-columns:repeat(12,1fr);gap:18px}.project{grid-column:span 4;border:1px solid #00000012;border-radius:28px;overflow:hidden;background:#fff}.project-featured{grid-column:span 8}.project-image{display:block;width:100%;height:260px;object-fit:cover;background:linear-gradient(135deg,var(--secondary)66,var(--primary)22)}.project-featured .project-image{height:400px}.project-placeholder{background:radial-gradient(circle at 20% 30%,var(--secondary)88,transparent 28%),linear-gradient(135deg,var(--primary),var(--fg))}.project-copy{padding:22px}.project-index{font-size:11px;color:var(--secondary);font-weight:800}.project h3,.service h3,.process h3{font-size:22px;letter-spacing:-.04em;margin:12px 0}.project p,.service p,.process p{color:#6b756f;line-height:1.7;margin:0}.project strong{display:block;margin-top:16px;color:var(--primary)}.services{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.service{padding:26px;border-top:2px solid var(--primary)}.process-list{display:grid;gap:0}.process{display:grid;grid-template-columns:90px 1fr;gap:25px;padding:24px 0;border-top:1px solid #00000016}.process span{font-weight:800;color:var(--secondary)}.process h3{margin-top:0}.about{display:grid;grid-template-columns:.7fr 1.3fr;gap:50px;align-items:start;background:var(--primary);color:#fff}.about .muted{color:#ffffffb5}.contact{background:var(--secondary);color:var(--fg)}.contact h2{max-width:720px}.footer{padding:26px 6vw;border-top:1px solid #00000016;font-size:12px;color:#6b756f}@media(max-width:760px){.section{padding:64px 6vw}.project,.project-featured{grid-column:span 12}.project-image,.project-featured .project-image{height:250px}.about{grid-template-columns:1fr;gap:22px}.process{grid-template-columns:55px 1fr}.nav{padding:20px 6vw}}</style></head><body><main><nav class="nav"><div class="brand">${escapeHtml(store.title || 'Portfolio')}</div><a href="#contact">Let's work together <span aria-hidden="true">↗</span></a></nav><header class="hero"><div class="hero-inner"><div class="eyebrow">${escapeHtml(store.hero?.eyebrow || 'Independent creator')}</div><h1>${escapeHtml(store.hero?.headline || store.title)}</h1><p>${escapeHtml(store.hero?.subheadline || store.description)}</p><a class="button" href="#contact">${escapeHtml(store.hero?.ctaText || store.ctaText || 'Start a conversation')}</a></div></header>${projects ? `<section class="section"><div class="section-head"><h2>Selected<br>work</h2><p class="muted">A focused collection of work, shaped with intent and built to be remembered.</p></div><div class="projects">${projects}</div></section>` : ''}${services ? `<section class="section"><div class="section-head"><h2>Ways<br>to work</h2></div><div class="services">${services}</div></section>` : ''}${process ? `<section class="section"><div class="section-head"><h2>The<br>process</h2></div><div class="process-list">${process}</div></section>` : ''}<section class="section about"><h2>${escapeHtml(store.about?.heading || 'About the creator')}</h2><p class="muted">${escapeHtml(store.about?.body || store.description)}</p></section><section id="contact" class="section contact"><div class="eyebrow">Available for select projects</div><h2>${escapeHtml(store.contact?.heading || 'Let’s make something meaningful.')}</h2><p class="muted">${escapeHtml(store.contact?.body || 'Reach out to start a conversation.')}</p>${store.contact?.email ? `<a class="button" href="mailto:${escapeHtml(store.contact.email)}">${escapeHtml(store.contact.email)} ↗</a>` : ''}</section><footer class="footer">${escapeHtml(store.title || 'Portfolio')} · Otr Gebeya · ${escapeHtml(store.brand?.mood || 'Portfolio')}</footer></main></body></html>`;
+  const url = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = `${(store.title || 'otr-gebeya-portfolio').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}.html`;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
+function Field({ label, hint, children }) {
+  return <label className="block"><span className="flex items-center justify-between text-[11px] font-bold" style={{ color: COLORS.ink }}><span>{label}</span>{hint && <span className="font-medium" style={{ color: COLORS.muted }}>{hint}</span>}</span>{children}</label>;
+}
+
+function TypographyPanel({ form, updateForm, store, updateStore }) {
+  const setTypography = (field, value) => { updateForm(field, value); if (store) updateStore('typography', { ...(store.typography || DEFAULT_TYPOGRAPHY), [field]: value }); };
+  return <div className="rounded-2xl border p-4" style={{ borderColor: COLORS.line, backgroundColor: '#fafbf9' }}><div className="flex items-center justify-between gap-3"><div><p className="text-xs font-bold" style={{ color: COLORS.ink }}>Typography system</p><p className="text-[10px] mt-1" style={{ color: COLORS.muted }}>Pair a reading font with a signature display face.</p></div><Type size={16} style={{ color: COLORS.moss }} /></div><div className="mt-4 grid grid-cols-2 gap-3"><Field label="Body font"><select value={form.fontFamily} onChange={e => setTypography('fontFamily', e.target.value)} className="mt-1.5 w-full h-10 rounded-xl border px-2 text-xs outline-none bg-white" style={{ borderColor: COLORS.line }}>{FONT_OPTIONS.filter(option => !['playfair', 'fraunces', 'instrument-serif', 'lora'].includes(option.id)).map(option => <option key={option.id} value={option.id}>{option.label}</option>)}</select></Field><Field label="Heading font"><select value={form.headingFont} onChange={e => setTypography('headingFont', e.target.value)} className="mt-1.5 w-full h-10 rounded-xl border px-2 text-xs outline-none bg-white" style={{ borderColor: COLORS.line }}>{FONT_OPTIONS.map(option => <option key={option.id} value={option.id}>{option.label}</option>)}</select></Field><Field label="Type scale"><select value={form.typeScale} onChange={e => setTypography('typeScale', e.target.value)} className="mt-1.5 w-full h-10 rounded-xl border px-2 text-xs outline-none bg-white" style={{ borderColor: COLORS.line }}>{TYPE_SCALE_OPTIONS.map(option => <option key={option.id} value={option.id}>{option.label}</option>)}</select></Field><Field label="Letter spacing"><select value={form.letterSpacing} onChange={e => setTypography('letterSpacing', e.target.value)} className="mt-1.5 w-full h-10 rounded-xl border px-2 text-xs outline-none bg-white" style={{ borderColor: COLORS.line }}>{LETTER_SPACING_OPTIONS.map(option => <option key={option.id} value={option.id}>{option.label}</option>)}</select></Field></div><div className="mt-4 rounded-xl border bg-white p-3" style={{ borderColor: COLORS.line, fontFamily: fontCss(form.fontFamily) }}><p className="text-[10px] uppercase tracking-[0.18em] font-bold" style={{ color: COLORS.moss }}>Preview of your pairing</p><p className="mt-2 text-lg font-bold" style={{ fontFamily: fontCss(form.headingFont), letterSpacing: form.letterSpacing === 'airy' ? '0.01em' : form.letterSpacing === 'balanced' ? '-0.025em' : '-0.07em' }}>A point of view, beautifully made.</p><p className="mt-2 text-xs leading-5" style={{ color: COLORS.muted }}>Typography carries your brand before anyone reads the first paragraph.</p></div></div>;
+}
+
+function GenerationProgress({ progress, stage }) {
+  return <div className="rounded-2xl border p-4" style={{ borderColor: '#d3eadc', backgroundColor: COLORS.leaf }}><div className="flex items-center justify-between gap-3"><div className="flex items-center gap-2"><Loader size={15} className="animate-spin" style={{ color: COLORS.moss }} /><span className="text-xs font-bold" style={{ color: COLORS.ink }}>{PROGRESS_STAGES[stage] || PROGRESS_STAGES[0]}</span></div><span className="text-xs font-bold" style={{ color: COLORS.moss }}>{progress}%</span></div><div className="mt-3 h-2 rounded-full overflow-hidden bg-white"><div className="h-full rounded-full transition-all duration-500" style={{ width: `${progress}%`, background: `linear-gradient(90deg, ${COLORS.moss}, ${COLORS.gold})` }} /></div><div className="mt-3 grid grid-cols-5 gap-1">{PROGRESS_STAGES.map((item, index) => <div key={item} className="h-1 rounded-full" style={{ backgroundColor: index <= stage ? COLORS.moss : '#cfe0d5' }} />)}</div></div>;
+}
+
+function Preview({ store, onChange }) {
+  const brand = store?.brand || DEFAULT_BRAND;
+  const typography = store?.typography || DEFAULT_TYPOGRAPHY;
+  const bodyFont = fontCss(typography.fontFamily);
+  const headingFont = fontCss(typography.headingFont);
+  const headingSpacing = typography.letterSpacing === 'airy' ? '0.01em' : typography.letterSpacing === 'balanced' ? '-0.025em' : '-0.07em';
+  const headingScale = typography.typeScale === 'compact' ? 'clamp(42px, 7vw, 96px)' : typography.typeScale === 'display' ? 'clamp(58px, 11vw, 156px)' : 'clamp(52px, 10vw, 138px)';
+  const primary = safeCssColor(brand.primary, DEFAULT_BRAND.primary);
+  const secondary = safeCssColor(brand.secondary, DEFAULT_BRAND.secondary);
+  const background = safeCssColor(brand.background, DEFAULT_BRAND.background);
+  const foreground = safeCssColor(brand.foreground, DEFAULT_BRAND.foreground);
+  if (!store) return <div className="min-h-[760px] flex items-center justify-center text-center p-8" style={{ backgroundColor: DEFAULT_BRAND.background }}><div><div className="w-16 h-16 mx-auto rounded-3xl flex items-center justify-center" style={{ backgroundColor: COLORS.leaf, color: COLORS.moss }}><Layers3 size={28} /></div><h2 className="mt-5 text-xl font-bold" style={{ color: COLORS.ink }}>Your portfolio will appear here</h2><p className="mt-2 max-w-sm text-sm leading-6" style={{ color: COLORS.muted }}>Your brand brief becomes a responsive, editorial portfolio with a live visual system.</p></div></div>;
+  return <div className="min-h-[760px] overflow-hidden preview-typography" style={{ backgroundColor: background, color: foreground, fontFamily: bodyFont }}><style>{`.preview-typography h1,.preview-typography h2,.preview-typography h3,.preview-typography h4{font-family:${headingFont};letter-spacing:${headingSpacing}}.preview-typography .hero-headline{font-size:${headingScale}}`}</style>
+    <div className="px-6 py-3 flex items-center justify-between border-b" style={{ borderColor: `${primary}20`, backgroundColor: `${primary}08` }}><span className="text-[10px] uppercase tracking-[0.18em] font-bold" style={{ color: primary }}>Live portfolio preview</span><div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full" style={{ backgroundColor: secondary }} /><span className="text-[10px] font-bold" style={{ color: COLORS.muted }}>{fontLabel(typography.headingFont)} + {fontLabel(typography.fontFamily)} · {brand.mood || 'Brand system'}</span></div></div>
+    <nav className="px-7 md:px-12 py-5 flex items-center justify-between"><input aria-label="Portfolio name" value={store.title || ''} onChange={e => onChange('title', e.target.value)} className="max-w-[55%] bg-transparent text-sm font-extrabold tracking-[-0.03em] outline-none border-b border-transparent focus:border-black/15" /><a href="#portfolio-contact" className="text-xs font-bold" style={{ color: primary }}>Let's work together <ArrowUpRight size={13} className="inline" /></a></nav>
+    <section className="relative overflow-hidden px-7 py-20 md:px-12 md:py-28" style={{ background: `radial-gradient(circle at 84% 18%, ${secondary}88, transparent 27%), linear-gradient(135deg, ${primary}, ${foreground})`, color: '#fff' }}><div className="absolute -right-24 -bottom-44 w-[480px] h-[480px] rounded-full border border-white/20" /><div className="relative max-w-4xl"><input aria-label="Hero eyebrow" value={store.hero?.eyebrow || ''} onChange={e => onChange('hero', { ...(store.hero || {}), eyebrow: e.target.value })} className="w-full bg-transparent text-[10px] font-bold uppercase tracking-[0.22em] text-white/60 outline-none" /><textarea aria-label="Hero headline" value={store.hero?.headline || ''} onChange={e => onChange('hero', { ...(store.hero || {}), headline: e.target.value })} rows={2} className="w-full mt-5 bg-transparent font-bold leading-[.9] text-white outline-none resize-none hero-headline" /><textarea aria-label="Hero subheadline" value={store.hero?.subheadline || ''} onChange={e => onChange('hero', { ...(store.hero || {}), subheadline: e.target.value })} rows={3} className="w-full max-w-2xl mt-6 bg-transparent text-base leading-7 text-white/70 outline-none resize-none" /><button className="mt-6 px-5 py-3 rounded-xl text-xs font-bold" style={{ backgroundColor: secondary, color: foreground }}>{store.hero?.ctaText || store.ctaText || 'Start a conversation'} <ArrowUpRight size={14} className="inline ml-1" /></button></div></section>
+    {store.projects?.length > 0 && <section className="px-7 py-16 md:px-12"><div className="flex items-end justify-between gap-5 mb-7"><h3 className="text-4xl md:text-6xl font-bold leading-[.9] tracking-[-0.07em]">Selected<br />work</h3><p className="max-w-xs text-xs leading-5" style={{ color: COLORS.muted }}>A focused collection of work, shaped with intent and built to be remembered.</p></div><div className="grid grid-cols-12 gap-3">{store.projects.map((project, index) => <article key={`${project.title}-${index}`} className={`${index === 0 ? 'col-span-12 md:col-span-8' : 'col-span-12 md:col-span-4'} overflow-hidden rounded-3xl border bg-white`} style={{ borderColor: `${primary}16` }}><div className={`${index === 0 ? 'h-64 md:h-80' : 'h-52'} relative overflow-hidden`} style={{ background: `radial-gradient(circle at 20% 20%, ${secondary}99, transparent 25%), linear-gradient(135deg, ${primary}, ${foreground})` }}>{project.imageUrl ? <img src={project.imageUrl} alt={project.title} className="absolute inset-0 w-full h-full object-cover" /> : <div className="absolute inset-0 opacity-25" style={{ backgroundImage: 'linear-gradient(135deg, transparent 35%, rgba(255,255,255,.7) 36%, transparent 38%)', backgroundSize: '28px 28px' }} />}</div><div className="p-5"><span className="text-[10px] font-extrabold" style={{ color: secondary }}>0{index + 1}</span><h4 className="mt-2 text-lg font-bold tracking-[-0.04em]">{project.title}</h4><p className="mt-2 text-xs leading-5" style={{ color: COLORS.muted }}>{project.description}</p>{project.result && <p className="mt-3 text-xs font-bold" style={{ color: primary }}>{project.result}</p>}</div></article>)}</div></section>}
+    {store.services?.length > 0 && <section className="px-7 py-14 md:px-12" style={{ backgroundColor: `${primary}06` }}><h3 className="text-4xl md:text-6xl font-bold leading-[.9] tracking-[-0.07em]">Ways<br />to work</h3><div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-0">{store.services.map((service, index) => <article key={`${service.title}-${index}`} className="py-5 border-t-2" style={{ borderColor: primary }}><p className="text-[10px] font-bold" style={{ color: secondary }}>0{index + 1}</p><h4 className="mt-3 text-xl font-bold tracking-[-0.04em]">{service.title}</h4><p className="mt-2 text-xs leading-5" style={{ color: COLORS.muted }}>{service.description}</p></article>)}</div></section>}
+    {store.process?.length > 0 && <section className="px-7 py-14 md:px-12"><h3 className="text-4xl md:text-6xl font-bold leading-[.9] tracking-[-0.07em]">The<br />process</h3><div className="mt-8">{store.process.map((item, index) => <div key={`${item.title}-${index}`} className="grid grid-cols-[58px_1fr] gap-5 py-5 border-t" style={{ borderColor: `${primary}20` }}><span className="text-sm font-extrabold" style={{ color: secondary }}>{item.step || `0${index + 1}`}</span><div><h4 className="text-lg font-bold">{item.title}</h4><p className="mt-2 text-xs leading-5" style={{ color: COLORS.muted }}>{item.description}</p></div></div>)}</div></section>}
+    <section className="px-7 py-14 md:px-12 grid md:grid-cols-[.7fr_1.3fr] gap-8" style={{ backgroundColor: primary, color: '#fff' }}><h3 className="text-4xl md:text-6xl font-bold leading-[.9] tracking-[-0.07em]">{store.about?.heading || 'About the creator'}</h3><textarea aria-label="About section" value={store.about?.body || ''} onChange={e => onChange('about', { ...(store.about || {}), body: e.target.value })} rows={6} className="bg-transparent text-sm leading-7 text-white/75 outline-none resize-none" /></section>
+    <section id="portfolio-contact" className="px-7 py-16 md:px-12" style={{ backgroundColor: secondary, color: foreground }}><span className="text-[10px] uppercase tracking-[0.2em] font-bold">Available for select projects</span><h3 className="mt-5 max-w-3xl text-4xl md:text-6xl font-bold leading-[.9] tracking-[-0.07em]">{store.contact?.heading || 'Let’s make something meaningful.'}</h3><p className="mt-5 max-w-xl text-sm leading-6 opacity-75">{store.contact?.body || 'Reach out to start a conversation.'}</p>{store.contact?.email && <a href={`mailto:${store.contact.email}`} className="inline-flex mt-6 px-5 py-3 rounded-xl text-xs font-bold" style={{ backgroundColor: foreground, color: '#fff' }}>{store.contact.email} <ArrowUpRight size={14} className="ml-1" /></a>}</section><footer className="px-7 md:px-12 py-5 border-t text-xs" style={{ borderColor: `${primary}20`, color: COLORS.muted }}>{store.title} · Otr Gebeya · {brand.mood || 'Portfolio'}</footer>
+  </div>;
+}
+
+function DeployChecklist({ store }) {
+  const items = [{ label: 'Brand system generated', done: Boolean(store?.brand?.primary) }, { label: 'Responsive sections included', done: Boolean(store?.sections?.length) }, { label: 'Portfolio work is editable', done: Boolean(store?.projects) }, { label: 'Export package is ready', done: Boolean(store) }];
+  return <div className="rounded-3xl border bg-white p-5" style={{ borderColor: COLORS.line }}><div className="flex items-center gap-2"><div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: COLORS.leaf, color: COLORS.moss }}><ShieldCheck size={17} /></div><div><h3 className="text-sm font-bold" style={{ color: COLORS.ink }}>Deployment readiness</h3><p className="text-[10px] mt-1" style={{ color: COLORS.muted }}>A clean static package you can deploy anywhere.</p></div></div><div className="mt-4 space-y-2">{items.map(item => <div key={item.label} className="flex items-center gap-2 text-xs" style={{ color: item.done ? COLORS.moss : COLORS.muted }}>{item.done ? <Check size={14} /> : <span className="w-3.5 h-3.5 rounded-full border" style={{ borderColor: COLORS.line }} />}{item.label}</div>)}</div></div>;
+}
 
 export default function AIStoreBuilder() {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const [messages, setMessages] = useState([
-    { role: 'assistant', content: 'Welcome to the AI Store Builder! I can help you create gig descriptions, write business bios, draft job posts, and more. Try one of the templates below or ask me anything!' }
-  ]);
-  const [input, setInput] = useState('');
+  const [form, setForm] = useState(START_FORM);
+  const [store, setStore] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('chat');
-  const selectedModel = 0;
-  const [gigTopic, setGigTopic] = useState('');
-  const [gigCategory, setGigCategory] = useState('');
-  const [generatedGig, setGeneratedGig] = useState(null);
-  const [generating, setGenerating] = useState(false);
-  // User overrides for AI-generated values
-  const [customPrice, setCustomPrice] = useState('');
-  const [customDelivery, setCustomDelivery] = useState('');
-  const [postingGig, setPostingGig] = useState(false);
-  const messagesEndRef = useRef(null);
+  const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
+  const [progress, setProgress] = useState(0);
+  const [stage, setStage] = useState(0);
+  const [activeMode, setActiveMode] = useState('builder');
+  const timerRef = useRef(null);
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  useEffect(() => () => clearInterval(timerRef.current), []);
+  const updateForm = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
+  const updateStore = (field, value) => setStore(prev => prev ? ({ ...prev, [field]: value }) : prev);
+  const brand = store?.brand || DEFAULT_BRAND;
+  const completeness = useMemo(() => [form.storeName, form.description, form.portfolioItems, form.products, form.brandColors].filter(value => value?.trim()).length, [form]);
 
-  const sendMessage = async (content) => {
-    if (!content?.trim() || loading) return;
-    
-    const userMsg = { role: 'user', content: content.trim() };
-    setMessages(prev => [...prev, userMsg]);
-    setInput('');
-    setLoading(true);
-
-    setMessages(prev => [...prev, { role: 'assistant', content: '', loading: true }]);
-
-    const chatMessages = messages
-      .filter(m => !m.loading)
-      .map(m => ({ role: m.role, content: m.content }));
-
+  const generate = async () => {
+    if (!form.storeName.trim() || !form.description.trim() || loading) return;
+    setLoading(true); setError(''); setNotice(''); setProgress(7); setStage(0);
+    clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => { setProgress(current => { const next = Math.min(current + Math.floor(Math.random() * 8) + 3, 92); setStage(Math.min(4, Math.floor(next / 20))); return next; }); }, 650);
     try {
-      // Route through the server API — no API keys exposed in browser!
-      const response = await fetch('/api/ai/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('erq_token')}`
-        },
-        body: JSON.stringify({
-          messages: [
-            ...chatMessages,
-            { role: 'user', content: content.trim() }
-          ],
-          systemPrompt: 'You are an AI assistant for Erq, an Ethiopian freelance marketplace. Help users create gigs, write descriptions, brainstorm ideas, and grow their freelance business. Be friendly, professional, and practical.',
-          modelIndex: selectedModel
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let fullContent = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n').filter(l => l.startsWith('data: '));
-        
-        for (const line of lines) {
-          try {
-            const data = JSON.parse(line.slice(6));
-            if (data.type === 'content' && data.content) {
-              fullContent += data.content;
-              setMessages(prev => {
-                const updated = [...prev];
-                updated[updated.length - 1] = { role: 'assistant', content: fullContent, loading: false };
-                return updated;
-              });
-            } else if (data.type === 'error') {
-              throw new Error(data.content);
-            }
-          } catch (e) {
-            if (e.message !== 'Unexpected token') throw e;
-          }
-        }
-      }
-
-      setMessages(prev => {
-        const updated = [...prev];
-        updated[updated.length - 1] = { role: 'assistant', content: fullContent || 'No response generated.', loading: false };
-        return updated;
-      });
-
-    } catch (err) {
-      const msg = err.message === 'Failed to fetch'
-        ? 'AI service is currently unavailable. Please try again later.'
-        : err.message.includes('HTTP')
-          ? 'AI service error. Please try again.'
-          : `${err.message}`;
-      setMessages(prev => {
-        const updated = [...prev];
-        updated[updated.length - 1] = { role: 'assistant', content: msg, loading: false };
-        return updated;
-      });
-    } finally {
-      setLoading(false);
-    }
+      const response = await aiAPI.generateStore({ ...form, siteType: 'portfolio', currency: 'ETB' });
+      if (!response.data?.store) throw new Error('The AI returned no portfolio draft.');
+      clearInterval(timerRef.current); setProgress(100); setStage(4); setStore(response.data.store); setNotice('Portfolio generated. Edit the live preview, then export the deployment package.');
+    } catch (err) { clearInterval(timerRef.current); setProgress(0); setStage(0); setError(err.response?.data?.error || err.response?.data?.detail || err.message || 'Portfolio generation failed.'); } finally { setLoading(false); }
   };
 
-  const handleGenerateGig = async () => {
-    if (!gigTopic.trim() || generating) return;
-    setGenerating(true);
-    setGeneratedGig(null);
+  const reset = () => { clearInterval(timerRef.current); setStore(null); setForm(START_FORM); setError(''); setNotice(''); setProgress(0); setStage(0); };
 
-    try {
-      const res = await api.post('/ai/generate-gig', {
-        topic: gigTopic.trim(),
-        category: gigCategory || 'General'
-      });
-      setGeneratedGig(res.data.gig);
-    } catch (err) {
-      console.error('Failed to generate gig:', err);
-    } finally {
-      setGenerating(false);
-    }
-  };
-
-  const useTemplate = (prompt) => {
-    sendMessage(prompt);
-  };
-
-  const GeneratedGigCard = ({ gig }) => {
-    if (!gig) return null;
-    if (gig.raw) {
-      return (
-        <div className="card-3d p-6">
-          <pre className="text-sm text-gray-700 whitespace-pre-wrap">{gig.raw}</pre>
-        </div>
-      );
-    }
-    return (
-      <div className="card-3d p-6 space-y-4" style={{ animation: 'slideUp 0.5s ease-out' }}>
-        <div className="flex items-start justify-between">
-          <div>
-            <span className="badge-green text-xs mb-2 inline-block">AI Generated</span>
-            <h3 className="text-xl font-bold text-gray-900">{gig.title}</h3>
-          </div>
-          {gig.price_range && (
-            <span className="text-lg font-bold text-gebeya-600">{gig.price_range}</span>
-          )}
-        </div>
-        <p className="text-gray-600 leading-relaxed">{gig.description}</p>
-        {gig.delivery_time && (
-          <p className="text-sm text-gray-400 flex items-center gap-1">
-            <Clock size={14} /> Delivery: <strong>{gig.delivery_time}</strong>
-          </p>
-        )}
-        {gig.tags && gig.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {gig.tags.map((tag, i) => (
-              <span key={i} className="badge bg-gebeya-50 text-gebeya-700 text-xs">{tag}</span>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Bot size={24} /> AI Store Builder
-            <span className="text-xs font-normal text-gray-400 bg-gray-100 px-2.5 py-1 rounded-full">GLM 5.2</span>
-          </h1>
-          <p className="text-gray-500 text-sm mt-1">Generate gigs, write descriptions, and grow your freelance business</p>
-        </div>
-
-      </div>
-
-      {/* Tab Navigation */}
-      <div className="flex gap-1 bg-gray-100 rounded-xl p-1">
-        {[
-          { id: 'chat', label: 'AI Chat', desc: 'Chat with AI assistant', icon: <MessageCircle size={16} /> },
-          { id: 'generator', label: 'Gig Generator', desc: 'Generate gig listings', icon: <Zap size={16} /> },
-          { id: 'website', label: 'Website Builder', desc: 'Drag & drop website builder', icon: <Layout size={16} /> },
-        ].map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex-1 px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
-              activeTab === tab.id ? 'bg-white text-gebeya-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            {tab.icon}
-            <span className="block">{tab.label}</span>
-            <span className="text-[10px] text-gray-400 font-normal hidden md:inline">{tab.desc}</span>
-          </button>
-        ))}
-      </div>
-
-      {/* ====== CHAT TAB ====== */}
-      {activeTab === 'chat' && (
-        <div className="grid grid-cols-4 gap-5">
-          {/* Prompt Templates */}
-          <div className="col-span-1 space-y-2">
-            <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-              <FileText size={14} /> Templates
-            </h3>
-            <div className="text-[10px] text-gray-400 mb-2 uppercase tracking-wider font-semibold">Content Templates</div>
-            {promptTemplates.map((t, i) => (
-              <button
-                key={i}
-                onClick={() => useTemplate(t.prompt)}
-                disabled={loading}
-                className="w-full text-left p-3 rounded-xl border border-gray-100 hover:border-gebeya-200 hover:bg-gebeya-50/30 transition-all group flex items-center gap-2"
-              >
-                <span className="text-gebeya-500">{t.icon}</span>
-                <span className="text-sm font-medium text-gray-700 group-hover:text-gebeya-600">{t.name}</span>
-              </button>
-            ))}
-          </div>
-
-          {/* Chat Area */}
-          <div className="col-span-3 card-3d flex flex-col" style={{ height: '600px' }}>
-            <div className="flex-1 overflow-y-auto p-5 space-y-4">
-              {messages.map((msg, i) => (
-                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                     style={{ animation: 'slideUp 0.3s ease-out' }}>
-                  <div className={`max-w-[80%] px-4 py-3 rounded-2xl ${
-                    msg.role === 'user'
-                      ? 'bg-gebeya-500 text-white rounded-br-md'
-                      : 'bg-gray-50 text-gray-900 border border-gray-100 rounded-bl-md'
-                  }`}>
-                    {msg.loading ? (
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 bg-gebeya-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                        <span className="w-2 h-2 bg-gebeya-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                        <span className="w-2 h-2 bg-gebeya-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                      </div>
-                    ) : (
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-                    )}
-                  </div>
-                </div>
-              ))}
-              <div ref={messagesEndRef} />
-            </div>
-
-            {/* Input */}
-            <div className="p-4 border-t border-gray-100">
-              <div className="flex gap-3">
-                <input
-                  type="text"
-                  value={input}
-                  onChange={e => setInput(e.target.value)}
-                  onKeyPress={e => e.key === 'Enter' && sendMessage(input)}
-                  placeholder="Ask the AI Store Builder anything..."
-                  className="flex-1 px-4 py-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-gebeya-500/30 focus:border-gebeya-500 text-sm"
-                  disabled={loading}
-                />
-                <button
-                  onClick={() => sendMessage(input)}
-                  disabled={loading || !input.trim()}
-                  className="bg-gebeya-600 text-white px-6 py-3 rounded-xl hover:bg-gebeya-700 transition-all disabled:opacity-50 font-medium shadow-sm flex items-center gap-2"
-                >
-                  {loading ? (
-                    <Loader size={16} className="animate-spin" />
-                  ) : (
-                    <><Send size={16} /> Send</>
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ====== WEBSITE BUILDER TAB ====== */}
-      {activeTab === 'website' && (
-        <div className="card-3d overflow-hidden">
-          <WebsiteBuilder />
-        </div>
-      )}
-
-      {/* ====== GIG GENERATOR TAB ====== */}
-      {activeTab === 'generator' && (
-        <div className="grid grid-cols-2 gap-5">
-          {/* Generator Form */}
-          <div className="card-3d p-6 space-y-5">
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-1">Generate a Gig Listing</h3>
-              <p className="text-sm text-gray-500">Describe what you want and AI will create a complete gig</p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">What service do you offer?</label>
-              <textarea
-                value={gigTopic}
-                onChange={e => setGigTopic(e.target.value)}
-                placeholder="e.g., Professional Amharic to English translation for business documents..."
-                rows={4}
-                className="input-field resize-none"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Category (optional)</label>
-              <select value={gigCategory} onChange={e => setGigCategory(e.target.value)} className="input-field">
-                <option value="">Auto-detect</option>
-                <option value="Translation">Translation</option>
-                <option value="Graphic Design">Graphic Design</option>
-                <option value="Video Editing">Video Editing</option>
-                <option value="Web Development">Web Development</option>
-                <option value="Virtual Assistant">Virtual Assistant</option>
-                <option value="Social Media Management">Social Media Management</option>
-                <option value="Digital Marketing">Digital Marketing</option>
-                <option value="Writing">Writing</option>
-              </select>
-            </div>
-
-            <button
-              onClick={handleGenerateGig}
-              disabled={generating || !gigTopic.trim()}
-              className="btn-primary w-full py-3 flex items-center justify-center gap-2"
-            >
-              {generating ? (
-                <>
-                  <Loader size={16} className="animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Zap size={16} />
-                  Generate Gig
-                </>
-              )}
-            </button>
-
-            <div className="text-xs text-gray-400 text-center">
-              Powered by GLM 5.2
-            </div>
-          </div>
-
-          {/* Generated Result */}
-          <div className="space-y-4">
-            {generating ? (
-              <div className="card-3d p-12 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="w-16 h-16 border-4 border-gebeya-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                  <p className="text-gray-500 animate-pulse">AI is crafting your gig...</p>
-                </div>
-              </div>
-            ) : generatedGig ? (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-                    <Sparkles size={16} /> Generated Gig
-                  </h3>
-                </div>
-                <GeneratedGigCard gig={generatedGig} />
-
-                {/* Editable Price & Delivery — user overrides AI values */}
-                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-amber-600 text-sm">✏️</span>
-                    <p className="text-sm font-medium text-amber-800">Set Your Price & Delivery</p>
-                    <span className="text-[10px] text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full">AI suggested — you decide</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-medium text-amber-700 mb-1">
-                        Price (ETB) <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="number"
-                        min={1}
-                        value={customPrice}
-                        onChange={e => setCustomPrice(e.target.value)}
-                        placeholder={generatedGig.price_range?.replace(/[^0-9]/g, '') || 'e.g. 500'}
-                        className="w-full px-3 py-2 rounded-lg border border-amber-300 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200 bg-white"
-                      />
-                      {generatedGig.price_range && !customPrice && (
-                        <p className="text-[10px] text-amber-500 mt-0.5">
-                          AI suggests {generatedGig.price_range}
-                        </p>
-                      )}
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-amber-700 mb-1">
-                        Delivery Time (days) <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="number"
-                        min={1}
-                        value={customDelivery}
-                        onChange={e => setCustomDelivery(e.target.value)}
-                        placeholder={generatedGig.delivery_time?.replace(/[^0-9]/g, '') || 'e.g. 3'}
-                        className="w-full px-3 py-2 rounded-lg border border-amber-300 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200 bg-white"
-                      />
-                      {generatedGig.delivery_time && !customDelivery && (
-                        <p className="text-[10px] text-amber-500 mt-0.5">
-                          AI suggests {generatedGig.delivery_time}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex gap-2">
-                  <button
-                    onClick={async () => {
-                      try {
-                        setPostingGig(true);
-                        // Extract first number from price_range (handle ranges like "ETB 500 - 1500")
-                        const priceFromAI = generatedGig.price_range?.match(/\d+/)?.[0] || '100';
-                        const price = parseInt(customPrice) || parseInt(priceFromAI);
-                        const deliveryFromAI = generatedGig.delivery_time?.match(/\d+/)?.[0] || '3';
-                        const delivery = parseInt(customDelivery) || parseInt(deliveryFromAI);
-                        if (price <= 0 || delivery <= 0) {
-                          alert('Please enter a valid price and delivery time');
-                          setPostingGig(false);
-                          return;
-                        }
-                        const fd = new FormData();
-                        fd.append('title', generatedGig.title || gigTopic);
-                        fd.append('description', generatedGig.description || '');
-                        fd.append('price', price);
-                        fd.append('category', gigCategory || 'General');
-                        fd.append('deliveryTime', delivery);
-                        await gigsAPI.create(fd);
-                        navigate('/my-gigs');
-                      } catch (err) {
-                        alert('Failed to create gig: ' + (err.response?.data?.error || err.message));
-                      } finally {
-                        setPostingGig(false);
-                      }
-                    }}
-                    disabled={postingGig}
-                    className="flex-1 btn-primary text-sm py-3 flex items-center justify-center gap-2"
-                  >
-                    {postingGig ? (
-                      <>
-                        <Loader size={14} className="animate-spin" />
-                        Posting...
-                      </>
-                    ) : (
-                      <>
-                        🚀 Post Gig — ETB {parseInt(customPrice || generatedGig.price_range?.match(/\d+/)?.[0] || '100').toLocaleString()}
-                      </>
-                    )}
-                  </button>
-                  <button
-                    onClick={handleGenerateGig}
-                    disabled={postingGig}
-                    className="btn-secondary text-sm flex items-center justify-center gap-2 px-6"
-                  >
-                    <RefreshCw size={14} /> Regenerate
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="card-3d p-12 flex items-center justify-center h-full">
-                <div className="text-center">
-                  <Bot size={48} className="mx-auto mb-4 text-gray-300" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Ready to Generate</h3>
-                  <p className="text-gray-500 text-sm max-w-sm">
-                    Describe your service and click "Generate Gig" to create a professional listing with AI.
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
+  return <div className="max-w-[1600px] mx-auto pb-10"><div className="flex flex-wrap items-end justify-between gap-5 mb-6"><div><p className="text-[10px] uppercase tracking-[0.2em] font-bold" style={{ color: COLORS.moss }}>Build & grow / portfolio studio</p><h1 className="mt-2 text-3xl md:text-5xl font-bold tracking-[-0.06em]" style={{ color: COLORS.ink }}>Make your work impossible to ignore.</h1><p className="mt-3 max-w-3xl text-sm leading-6" style={{ color: COLORS.muted }}>The AI Store Builder now creates premium personal portfolio websites, not generic shops. It reads your brand direction, composes a visual system, and gives you an editable static site ready to deploy.</p></div><div className="flex items-center gap-2"><Link to="/dashboard" className="h-10 px-3 rounded-xl border bg-white text-xs font-bold flex items-center gap-2" style={{ borderColor: COLORS.line, color: COLORS.ink }}><ChevronRight size={14} className="rotate-180" /> Dashboard</Link><Link to="/profile" className="h-10 px-3 rounded-xl border bg-white text-xs font-bold flex items-center gap-2" style={{ borderColor: COLORS.line, color: COLORS.ink }}>Profile <ArrowUpRight size={14} /></Link></div></div>
+    <div className="flex flex-wrap items-center justify-between gap-4 p-1 rounded-2xl border bg-white mb-5" style={{ borderColor: COLORS.line }}><div className="flex items-center gap-1"><button onClick={() => setActiveMode('builder')} className="px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2" style={{ backgroundColor: activeMode === 'builder' ? COLORS.ink : 'transparent', color: activeMode === 'builder' ? '#fff' : COLORS.muted }}><WandSparkles size={14} /> Portfolio builder</button><button onClick={() => setActiveMode('guide')} className="px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2" style={{ backgroundColor: activeMode === 'guide' ? COLORS.ink : 'transparent', color: activeMode === 'guide' ? '#fff' : COLORS.muted }}><FileText size={14} /> Studio guide</button></div><div className="flex items-center gap-2 px-3"><span className="w-2 h-2 rounded-full" style={{ backgroundColor: brand.secondary || COLORS.gold }} /><span className="text-[10px] font-bold" style={{ color: COLORS.muted }}>{store ? `${brand.mood || 'Brand system'} · Ready to export` : `${completeness}/5 creative inputs`}</span></div></div>
+    {activeMode === 'guide' ? <div className="grid lg:grid-cols-4 gap-4"><div className="rounded-3xl border bg-white p-6" style={{ borderColor: COLORS.line }}><div className="w-11 h-11 rounded-2xl flex items-center justify-center" style={{ backgroundColor: COLORS.leaf, color: COLORS.moss }}><FileText size={19} /></div><h2 className="mt-5 font-bold" style={{ color: COLORS.ink }}>Bring the raw material</h2><p className="mt-2 text-sm leading-6" style={{ color: COLORS.muted }}>Add your real services, projects, contact details, and brand direction. The builder does not invent proof.</p></div><div className="rounded-3xl border bg-white p-6" style={{ borderColor: COLORS.line }}><div className="w-11 h-11 rounded-2xl flex items-center justify-center" style={{ backgroundColor: '#fff7e8', color: COLORS.gold }}><Palette size={19} /></div><h2 className="mt-5 font-bold" style={{ color: COLORS.ink }}>Shape the aesthetic</h2><p className="mt-2 text-sm leading-6" style={{ color: COLORS.muted }}>Give it color references, mood, and voice. The AI turns that into a consistent visual language.</p></div><div className="rounded-3xl border bg-white p-6" style={{ borderColor: COLORS.line }}><div className="w-11 h-11 rounded-2xl flex items-center justify-center" style={{ backgroundColor: '#eeeafe', color: '#6657a6' }}><Eye size={19} /></div><h2 className="mt-5 font-bold" style={{ color: COLORS.ink }}>Edit in context</h2><p className="mt-2 text-sm leading-6" style={{ color: COLORS.muted }}>Every key headline, about paragraph, and project card can be refined directly in the preview.</p></div><div className="rounded-3xl border bg-white p-6" style={{ borderColor: COLORS.line }}><div className="w-11 h-11 rounded-2xl flex items-center justify-center" style={{ backgroundColor: '#f2f4f2', color: COLORS.ink }}><Globe2 size={19} /></div><h2 className="mt-5 font-bold" style={{ color: COLORS.ink }}>Deploy anywhere</h2><p className="mt-2 text-sm leading-6" style={{ color: COLORS.muted }}>Export a self-contained HTML file with responsive CSS and metadata for static hosting.</p></div></div> : <div className="grid xl:grid-cols-[380px_1fr] gap-5 items-start"><section className="space-y-4"><div className="rounded-3xl border bg-white p-5" style={{ borderColor: COLORS.line }}><div className="flex items-center justify-between mb-5"><div><h2 className="text-sm font-bold" style={{ color: COLORS.ink }}>Brand brief</h2><p className="text-[10px] mt-1" style={{ color: COLORS.muted }}>{completeness}/5 creative inputs complete</p></div><button onClick={reset} className="text-[10px] font-bold flex items-center gap-1" style={{ color: COLORS.muted }}><RefreshCw size={12} /> Reset</button></div><div className="space-y-4"><Field label="Portfolio name" hint="Required"><input value={form.storeName} onChange={e => updateForm('storeName', e.target.value)} placeholder="e.g. Hana Tesfaye — Brand Designer" className="mt-1.5 w-full h-11 rounded-xl border px-3 text-sm outline-none focus:ring-2" style={{ borderColor: COLORS.line }} /></Field><Field label="What do you create?" hint="Required"><textarea value={form.description} onChange={e => updateForm('description', e.target.value)} placeholder="Describe your craft, audience, point of view, and what makes your work distinct..." rows={5} className="mt-1.5 w-full rounded-xl border px-3 py-3 text-sm outline-none resize-none focus:ring-2" style={{ borderColor: COLORS.line }} /></Field><Field label="Featured projects" hint="Recommended"><textarea value={form.portfolioItems} onChange={e => updateForm('portfolioItems', e.target.value)} placeholder="One project per line: Project name — what you made — outcome if known" rows={5} className="mt-1.5 w-full rounded-xl border px-3 py-3 text-sm outline-none resize-none" style={{ borderColor: COLORS.line }} /></Field><Field label="Services"><textarea value={form.products} onChange={e => updateForm('products', e.target.value)} placeholder="Brand identity, art direction, web design..." rows={3} className="mt-1.5 w-full rounded-xl border px-3 py-3 text-sm outline-none resize-none" style={{ borderColor: COLORS.line }} /></Field><div className="grid grid-cols-2 gap-3"><Field label="Category"><input value={form.category} onChange={e => updateForm('category', e.target.value)} placeholder="Design" className="mt-1.5 w-full h-10 rounded-xl border px-3 text-sm outline-none" style={{ borderColor: COLORS.line }} /></Field><Field label="Brand colors"><input value={form.brandColors} onChange={e => updateForm('brandColors', e.target.value)} placeholder="#18221f, gold" className="mt-1.5 w-full h-10 rounded-xl border px-3 text-sm outline-none" style={{ borderColor: COLORS.line }} /></Field></div><TypographyPanel form={form} updateForm={updateForm} store={store} updateStore={updateStore} /><Field label="Visual direction"><input value={form.style} onChange={e => updateForm('style', e.target.value)} className="mt-1.5 w-full h-10 rounded-xl border px-3 text-sm outline-none" style={{ borderColor: COLORS.line }} /></Field><Field label="Brand voice"><input value={form.brandVoice} onChange={e => updateForm('brandVoice', e.target.value)} className="mt-1.5 w-full h-10 rounded-xl border px-3 text-sm outline-none" style={{ borderColor: COLORS.line }} /></Field><div className="grid grid-cols-2 gap-3"><Field label="Email"><input value={form.contactEmail} onChange={e => updateForm('contactEmail', e.target.value)} placeholder="hello@example.com" className="mt-1.5 w-full h-10 rounded-xl border px-3 text-sm outline-none" style={{ borderColor: COLORS.line }} /></Field><Field label="Social links"><input value={form.socialLinks} onChange={e => updateForm('socialLinks', e.target.value)} placeholder="Instagram, LinkedIn..." className="mt-1.5 w-full h-10 rounded-xl border px-3 text-sm outline-none" style={{ borderColor: COLORS.line }} /></Field></div></div>{loading && <div className="mt-5"><GenerationProgress progress={progress} stage={stage} /></div>}{error && <div className="mt-4 rounded-xl p-3 text-xs flex gap-2" style={{ color: '#b91c1c', backgroundColor: '#fff1f2', border: '1px solid #fecaca' }}><XCircle size={15} className="shrink-0" />{error}</div>}{notice && !loading && <div className="mt-4 rounded-xl p-3 text-xs flex gap-2" style={{ color: COLORS.moss, backgroundColor: COLORS.leaf, border: '1px solid #d3eadc' }}><Check size={15} className="shrink-0" />{notice}</div>}<button onClick={generate} disabled={loading || !form.storeName.trim() || !form.description.trim()} className="mt-5 w-full h-12 rounded-xl text-xs font-bold text-white flex items-center justify-center gap-2 disabled:opacity-50" style={{ background: `linear-gradient(100deg, ${COLORS.ink}, ${COLORS.moss})` }}>{loading ? <><Loader size={16} className="animate-spin" /> Creating the visual system…</> : <><Sparkles size={16} /> Generate stunning portfolio</>}</button><div className="mt-3 flex items-center justify-center gap-1.5 text-[10px]" style={{ color: COLORS.muted }}><ShieldCheck size={12} /> Saved server-side AI key · no fake proof</div></div><DeployChecklist store={store} /></section><section className="rounded-3xl border overflow-hidden shadow-sm" style={{ borderColor: COLORS.line }}><div className="px-5 py-3 bg-white border-b flex items-center justify-between" style={{ borderColor: COLORS.line }}><div className="flex items-center gap-2"><div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ backgroundColor: COLORS.leaf, color: COLORS.moss }}><Eye size={14} /></div><span className="text-xs font-bold" style={{ color: COLORS.ink }}>Preview studio</span></div>{store && <div className="flex items-center gap-2"><button onClick={() => downloadPortfolio(store)} className="h-8 px-3 rounded-lg text-[10px] font-bold flex items-center gap-1 text-white" style={{ backgroundColor: COLORS.moss }}><Download size={12} /> Export deployment package</button><button onClick={() => setStore(null)} className="h-8 px-3 rounded-lg border text-[10px] font-bold" style={{ borderColor: COLORS.line, color: COLORS.muted }}>Clear</button></div>}</div><Preview store={store} onChange={(field, value) => setStore(prev => prev ? ({ ...prev, [field]: value }) : prev)} /></section></div>}
+  </div>;
 }

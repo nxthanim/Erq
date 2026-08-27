@@ -33,6 +33,14 @@ async function runMigration(db) {
       // Column already exists - this is fine
     }
 
+    // Add clerk_id column for Clerk authentication (idempotent)
+    try {
+      await db.exec('ALTER TABLE users ADD COLUMN clerk_id TEXT;');
+      await db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_clerk_id ON users(clerk_id);');
+    } catch (err) {
+      // Column already exists - this is fine
+    }
+
     // Make job_id nullable in transactions table (gig orders don't reference a job)
     try {
       await db.exec('ALTER TABLE transactions ALTER COLUMN job_id DROP NOT NULL;');

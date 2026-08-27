@@ -7,9 +7,18 @@ const api = axios.create({
   }
 });
 
-// Attach token to requests
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('erq_token');
+// The auth context registers Clerk's getToken function at runtime. Keeping the
+// provider here avoids stale tokens in localStorage and lets Clerk rotate session
+// tokens without requiring a page refresh.
+let authTokenProvider = null;
+export const setAuthTokenProvider = (provider) => {
+  authTokenProvider = provider;
+};
+
+api.interceptors.request.use(async (config) => {
+  const token = authTokenProvider
+    ? await authTokenProvider().catch(() => null)
+    : localStorage.getItem('erq_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -17,13 +26,18 @@ api.interceptors.request.use((config) => {
 });
 
 // Handle 401 errors
+// In Clerk mode, Clerk owns the session Ã¢â‚¬â€ just clear the app JWT and let the
+// AuthContext bridge re-sync (it re-syncs on mount when Clerk is signed in).
+const CLERK_ENABLED = Boolean(import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('erq_token');
-      localStorage.removeItem('gebeya_user');
-      if (window.location.pathname !== '/login') {
+      if (!CLERK_ENABLED) {
+        localStorage.removeItem('erq_token');
+        localStorage.removeItem('gebeya_user');
+      }
+      if (!CLERK_ENABLED && window.location.pathname !== '/login') {
         window.location.href = '/login';
       }
     }
@@ -70,6 +84,11 @@ export const featuresAPI = {
   getReferralStats: () => api.get('/features/referral/stats'),
   lookupReferral: (code) => api.get(`/features/referral/lookup/${code}`),
   redeemReferral: (data) => api.post('/features/referral/redeem', data),
+
+  // Fan Tips (creator economy)
+  sendTip: (data) => api.post('/features/tips', data),
+  getTips: (userId) => api.get(`/features/tips/${userId}`),
+  getMyReceivedTips: () => api.get('/features/tips/me/received'),
 };
 
 // Orders (Gig Purchases with Escrow)
@@ -108,6 +127,11 @@ export const authAPI = {
   signup: (data) => api.post('/auth/signup', data),
   login: (data) => api.post('/auth/login', data),
   me: () => api.get('/auth/me'),
+  // Clerk bridge: verify Clerk session token, get app JWT + user.
+  // Optional profile fields (full_name/email/profile_picture) are hints from
+  // the Clerk SDK so the backend can name the user correctly even when it
+  // cannot fetch the Clerk profile itself.
+  clerkSync: (clerkToken, profile) => api.post('/auth/clerk/sync', { token: clerkToken, ...(profile || {}) }),
   updateProfile: (data) => api.put('/auth/profile', data),
   uploadProfilePicture: (formData) => api.put('/users/profile-picture', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
@@ -115,6 +139,8 @@ export const authAPI = {
   // Email verification
   verifyEmail: (email, verificationData) => api.post('/auth/verify-email', { email, verificationData }),
   getVerificationStatus: (email) => api.get(`/auth/verification-status/${encodeURIComponent(email)}`),
+  // Role selection
+  updateRole: (role) => api.put('/auth/role', { role }),
   // Password reset
   forgotPassword: (data) => api.post('/auth/forgot-password', data),
   resetPassword: (data) => api.post('/auth/reset-password', data),
@@ -218,6 +244,13 @@ export const adminAPI = {
   getBiometricEvidence: () => api.get('/admin/biometric-evidence'),
   getReviews: (params) => api.get('/admin/reviews', { params }),
   deleteReview: (id) => api.delete(`/admin/reviews/${id}`),
+
+  // Security: rate limiting & IP bans
+  getBannedIps: () => api.get('/admin/security/banned-ips'),
+  banIp: (ip, reason = '', minutes = 1440) => api.post('/admin/security/banned-ips', { ip, reason, minutes }),
+  unbanIp: (ip) => api.delete(`/admin/security/banned-ips/${encodeURIComponent(ip)}`),
+  getRateLimitStats: () => api.get('/admin/security/rate-limits'),
+  getSecurityAuditLog: () => api.get('/admin/security/audit-log'),
 };
 
 // Business Dashboard
@@ -244,20 +277,33 @@ export const businessAPI = {
 
 // AI Image Generation
 export const aiAPI = {
-  // Image-to-image editing (FLUX.1-kontext-dev) — requires an input image
+  // Image-to-image editing (FLUX.1-kontext-dev) Ã¢â‚¬â€ requires an input image
   generateImage: (data) => api.post('/ai/generate-image', data),
-  // Text-to-image generation (FLUX-schnell) — no input image needed
+  // Text-to-image generation (FLUX-schnell) Ã¢â‚¬â€ no input image needed
   generateImageTxt2img: (data) => api.post('/ai/generate-image-txt2img', data),
   chat: (data) => api.post('/ai/chat', data),
   generateGig: (data) => api.post('/ai/generate-gig', data),
+  generateStore: (data) => api.post('/ai/generate-store', data),
 
   getRecommendations: (params) => api.get('/ai/recommendations', { params }),
   smartMatch: (data) => api.post('/ai/smart-match', data),
 };
 
+// Ads (create ad campaigns like ye-buna's Facebook/Instagram ad tool)
+export const adsAPI = {
+  create: (data) => api.post('/ads', data),
+  list: () => api.get('/ads'),
+  stats: () => api.get('/ads/stats'),
+  update: (id, data) => api.put(`/ads/${id}`, data),
+  delete: (id) => api.delete(`/ads/${id}`),
+};
+
 // AI Agents & Subagents
 export const agentsAPI = {
-  list: () => api.get('/agents'),
+  list: () => api.get('/agents').then((response) => ({
+    ...response,
+    data: Array.isArray(response?.data) ? { agents: response.data } : response.data,
+  })),
   create: (data) => api.post('/agents', data),
   update: (id, data) => api.put(`/agents/${id}`, data),
   delete: (id) => api.delete(`/agents/${id}`),

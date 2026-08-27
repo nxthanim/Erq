@@ -8,6 +8,18 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Erq Marketplace palette (Fiverr-style structure, Erq brand colors)
+        erq: {
+          ink: '#17191c',
+          paper: '#ffffff',
+          mist: '#f2f2f3',
+          fog: '#fafafb',
+          slate: '#777b86',
+          ash: '#979799',
+          smoke: '#a3a6af',
+          peach: '#fbe1d1',
+          sienna: '#5d2a1a',
+        },
         // Steep Color System
         'ink-black': '#17191c',
         'paper-white': '#ffffff',

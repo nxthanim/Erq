@@ -20,10 +20,10 @@ import OrderStatusChip from '../components/ui/OrderStatusChip';
 const statusConfig = {
   pending: { label: 'Pending', color: '#777b86', bg: '#f2f2f3', icon: Clock },
   pending_payment: { label: 'Pending Payment', color: '#b45309', bg: 'rgba(251,225,209,0.3)', icon: ShoppingCart },
-  accepted: { label: 'Accepted', color: '#5d2a1a', bg: 'rgba(93,42,26,0.08)', icon: CheckCircle },
-  in_progress: { label: 'In Progress', color: '#5d2a1a', bg: 'rgba(93,42,26,0.08)', icon: RefreshCw },
-  delivered: { label: 'Delivered', color: '#5d2a1a', bg: 'rgba(93,42,26,0.08)', icon: Package },
-  completed: { label: 'Completed', color: '#5d2a1a', bg: 'rgba(251,225,209,0.3)', icon: CheckCircle },
+  accepted: { label: 'Accepted', color: '#1f6f5c', bg: 'rgba(93,42,26,0.08)', icon: CheckCircle },
+  in_progress: { label: 'In Progress', color: '#1f6f5c', bg: 'rgba(93,42,26,0.08)', icon: RefreshCw },
+  delivered: { label: 'Delivered', color: '#1f6f5c', bg: 'rgba(93,42,26,0.08)', icon: Package },
+  completed: { label: 'Completed', color: '#1f6f5c', bg: 'rgba(251,225,209,0.3)', icon: CheckCircle },
   cancelled: { label: 'Cancelled', color: '#777b86', bg: '#f2f2f3', icon: XCircle },
   disputed: { label: 'Disputed', color: '#777b86', bg: '#f2f2f3', icon: Scale },
 };
@@ -149,7 +149,7 @@ function DeliveryUploadModal({ isOpen, onClose, orderId, onDelivered }) {
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-5">
-          <h3 className="text-lg font-semibold" style={{ color: '#17191c' }}>Deliver Project Files</h3>
+          <h3 className="text-lg font-semibold" style={{ color: '#173a32' }}>Deliver Project Files</h3>
           <button onClick={onClose} style={{ color: '#777b86' }} className="p-1 rounded-lg hover:bg-gray-50 transition-all">
             <XCircle size={20} />
           </button>
@@ -169,7 +169,7 @@ function DeliveryUploadModal({ isOpen, onClose, orderId, onDelivered }) {
             className="hidden"
           />
           <Upload size={32} style={{ color: '#777b86' }} className="mx-auto mb-3" />
-          <p className="font-medium mb-1" style={{ color: '#17191c' }}>Click to upload files</p>
+          <p className="font-medium mb-1" style={{ color: '#173a32' }}>Click to upload files</p>
           <p style={{ color: '#979799', fontSize: '13px' }}>
             Any file type accepted — Max 100MB per file
           </p>
@@ -183,9 +183,9 @@ function DeliveryUploadModal({ isOpen, onClose, orderId, onDelivered }) {
               return (
                 <div key={i} className="flex items-center gap-3 p-3 rounded-xl"
                   style={{ backgroundColor: '#f2f2f3' }}>
-                  <Icon size={18} style={{ color: '#5d2a1a' }} />
+                  <Icon size={18} style={{ color: '#1f6f5c' }} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate" style={{ color: '#17191c' }}>{file.name}</p>
+                    <p className="text-sm font-medium truncate" style={{ color: '#173a32' }}>{file.name}</p>
                     <p style={{ color: '#979799', fontSize: '12px' }}>{formatFileSize(file.size)}</p>
                   </div>
                   <button onClick={() => removeFile(i)} style={{ color: '#777b86' }} className="hover:text-red-500 transition-all">
@@ -203,7 +203,7 @@ function DeliveryUploadModal({ isOpen, onClose, orderId, onDelivered }) {
           onChange={e => setMessage(e.target.value)}
           placeholder="Add a message about the delivery..."
           className="w-full rounded-2xl p-4 text-sm outline-none resize-none mb-4"
-          style={{ border: '1px solid #ececec', color: '#17191c', minHeight: '80px' }}
+          style={{ border: '1px solid #ececec', color: '#173a32', minHeight: '80px' }}
         />
 
         {uploading && (
@@ -215,7 +215,7 @@ function DeliveryUploadModal({ isOpen, onClose, orderId, onDelivered }) {
             <div className="w-full h-2 rounded-full" style={{ backgroundColor: '#f2f2f3' }}>
               <motion.div
                 className="h-full rounded-full"
-                style={{ backgroundColor: '#5d2a1a' }}
+                style={{ backgroundColor: '#1f6f5c' }}
                 initial={{ width: '0%' }}
                 animate={{ width: `${uploadProgress}%` }}
                 transition={{ duration: 0.3, ease: 'easeOut' }}
@@ -237,7 +237,7 @@ function DeliveryUploadModal({ isOpen, onClose, orderId, onDelivered }) {
           disabled={files.length === 0 || uploading}
           className="w-full py-3.5 rounded-full text-sm font-semibold transition-all flex items-center justify-center gap-2"
           style={{
-            backgroundColor: files.length > 0 && !uploading ? '#17191c' : '#f2f2f3',
+            backgroundColor: files.length > 0 && !uploading ? '#173a32' : '#f2f2f3',
             color: files.length > 0 && !uploading ? '#ffffff' : '#979799',
           }}
         >
@@ -290,7 +290,7 @@ function FileViewerModal({ delivery, onClose }) {
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-5">
-          <h3 className="text-lg font-semibold" style={{ color: '#17191c' }}>Delivered Files</h3>
+          <h3 className="text-lg font-semibold" style={{ color: '#173a32' }}>Delivered Files</h3>
           <button onClick={onClose} style={{ color: '#777b86' }} className="p-1 rounded-lg hover:bg-gray-50">
             <XCircle size={20} />
           </button>
@@ -298,7 +298,7 @@ function FileViewerModal({ delivery, onClose }) {
 
         {delivery.message && (
           <div className="mb-4 p-4 rounded-2xl" style={{ backgroundColor: '#fafafb' }}>
-            <p style={{ color: '#17191c', fontSize: '14px' }}>{delivery.message}</p>
+            <p style={{ color: '#173a32', fontSize: '14px' }}>{delivery.message}</p>
           </div>
         )}
 
@@ -308,9 +308,9 @@ function FileViewerModal({ delivery, onClose }) {
             return (
               <div key={i} className="p-4 rounded-2xl" style={{ backgroundColor: '#f2f2f3' }}>
                 <div className="flex items-start gap-3 mb-3">
-                  <Icon size={20} style={{ color: '#5d2a1a' }} />
+                  <Icon size={20} style={{ color: '#1f6f5c' }} />
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate" style={{ color: '#17191c' }}>{file.name}</p>
+                    <p className="font-medium text-sm truncate" style={{ color: '#173a32' }}>{file.name}</p>
                     <p style={{ color: '#979799', fontSize: '12px' }}>{formatFileSize(file.size)}</p>
                   </div>
                   {(file.data || file.url) && (
@@ -319,7 +319,7 @@ function FileViewerModal({ delivery, onClose }) {
                       className="p-2 rounded-xl transition-all"
                       style={{ backgroundColor: '#ffffff' }}
                     >
-                      <Download size={16} style={{ color: '#17191c' }} />
+                      <Download size={16} style={{ color: '#173a32' }} />
                     </a>
                   )}
                 </div>
@@ -351,7 +351,7 @@ function OrderCard({ order, user, onAction, onViewFiles, onReview, reviewedOrder
           <div className="flex items-center gap-2 mb-2">
             <OrderStatusChip status={order.status} size="sm" />
             {order.gig_category && (
-              <span className="px-2.5 py-1 rounded-full text-[11px]" style={{ backgroundColor: 'rgba(93,42,26,0.08)', color: '#5d2a1a' }}>
+              <span className="px-2.5 py-1 rounded-full text-[11px]" style={{ backgroundColor: 'rgba(93,42,26,0.08)', color: '#1f6f5c' }}>
                 {order.gig_category}
               </span>
             )}
@@ -360,7 +360,7 @@ function OrderCard({ order, user, onAction, onViewFiles, onReview, reviewedOrder
           {/* Title */}
           <Link to={`/orders/${order.id}`}
             className="font-semibold text-base transition-colors"
-            style={{ color: '#17191c' }}>
+            style={{ color: '#173a32' }}>
             {order.title || 'Order'}
           </Link>
 
@@ -383,7 +383,7 @@ function OrderCard({ order, user, onAction, onViewFiles, onReview, reviewedOrder
           {order.delivery && (
             <button onClick={() => onViewFiles(order.delivery)}
               className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium transition-all px-3 py-1.5 rounded-full"
-              style={{ backgroundColor: 'rgba(93,42,26,0.08)', color: '#5d2a1a' }}>
+              style={{ backgroundColor: 'rgba(93,42,26,0.08)', color: '#1f6f5c' }}>
               <Eye size={12} /> View Delivered Files
             </button>
           )}
@@ -391,7 +391,7 @@ function OrderCard({ order, user, onAction, onViewFiles, onReview, reviewedOrder
 
         {/* Price */}
         <div className="text-right shrink-0 ml-4">
-          <p className="text-lg font-bold" style={{ color: '#5d2a1a' }}>
+          <p className="text-lg font-bold" style={{ color: '#1f6f5c' }}>
             ETB {Number(order.price).toLocaleString()}
           </p>
         </div>
@@ -411,7 +411,7 @@ function OrderCard({ order, user, onAction, onViewFiles, onReview, reviewedOrder
           <>
             <button onClick={() => onAction(order.id, 'complete')}
               className="inline-flex items-center gap-1.5 py-2 px-4 rounded-full text-xs font-semibold transition-all"
-              style={{ backgroundColor: '#17191c', color: '#ffffff' }}>
+              style={{ backgroundColor: '#173a32', color: '#ffffff' }}>
               <CheckCircle size={14} /> Approve & Complete
             </button>
             <button onClick={() => onAction(order.id, 'dispute')}
@@ -426,7 +426,7 @@ function OrderCard({ order, user, onAction, onViewFiles, onReview, reviewedOrder
         {!isClient && order.status === 'pending' && (
           <button onClick={() => onAction(order.id, 'accept')}
             className="inline-flex items-center gap-1.5 py-2 px-4 rounded-full text-xs font-semibold transition-all"
-            style={{ backgroundColor: '#17191c', color: '#ffffff' }}>
+            style={{ backgroundColor: '#173a32', color: '#ffffff' }}>
             <CheckCircle size={14} /> Accept Project
           </button>
         )}
@@ -437,13 +437,13 @@ function OrderCard({ order, user, onAction, onViewFiles, onReview, reviewedOrder
             {(!order.transaction || order.transaction.txn_status === 'confirmed' || order.transaction?.txn_status === 'released') && (
               <button onClick={() => onAction(order.id, 'deliver')}
                 className="inline-flex items-center gap-1.5 py-2 px-4 rounded-full text-xs font-semibold transition-all"
-                style={{ backgroundColor: '#17191c', color: '#ffffff' }}>
+                style={{ backgroundColor: '#173a32', color: '#ffffff' }}>
                 <Upload size={14} /> Deliver Finished Work
               </button>
             )}
             {order.transaction && order.transaction.txn_status === 'escrow' && (
               <span className="text-xs py-1.5 px-3 rounded-full flex items-center gap-1.5"
-                style={{ color: '#5d2a1a', backgroundColor: 'rgba(251,225,209,0.3)' }}>
+                style={{ color: '#1f6f5c', backgroundColor: 'rgba(251,225,209,0.3)' }}>
                 <Lock size={12} /> Payment in Escrow — Awaiting Confirmation
               </span>
             )}
@@ -472,19 +472,19 @@ function OrderCard({ order, user, onAction, onViewFiles, onReview, reviewedOrder
         {order.status === 'completed' && (
           <>
             <span className="text-xs py-1.5 px-3 rounded-full flex items-center gap-1.5 font-medium"
-              style={{ color: '#5d2a1a', backgroundColor: 'rgba(251,225,209,0.3)' }}>
+              style={{ color: '#1f6f5c', backgroundColor: 'rgba(251,225,209,0.3)' }}>
               <CheckCircle size={12} /> Payment Released
             </span>
             {!reviewedOrders.includes(order.id) && (
               <button onClick={() => onReview(order)}
                 className="inline-flex items-center gap-1.5 py-2 px-4 rounded-full text-xs font-semibold transition-all"
-                style={{ backgroundColor: '#17191c', color: '#ffffff' }}>
+                style={{ backgroundColor: '#173a32', color: '#ffffff' }}>
                 <Star size={12} /> Leave a Review
               </button>
             )}
             {reviewedOrders.includes(order.id) && (
               <span className="text-xs py-1.5 px-3 rounded-full flex items-center gap-1.5"
-                style={{ color: '#5d2a1a', backgroundColor: 'rgba(93,42,26,0.08)' }}>
+                style={{ color: '#1f6f5c', backgroundColor: 'rgba(93,42,26,0.08)' }}>
                 <Star size={12} /> Reviewed
               </span>
             )}
@@ -678,13 +678,13 @@ export default function MyOrders() {
                     <div className="flex items-center gap-2 mb-2">
                       <OrderStatusChip status={singleOrder.status} size="sm" />
                       {singleOrder.gig_category && (
-                        <span className="px-2.5 py-1 rounded-full text-[11px]" style={{ backgroundColor: 'rgba(93,42,26,0.08)', color: '#5d2a1a' }}>
+                        <span className="px-2.5 py-1 rounded-full text-[11px]" style={{ backgroundColor: 'rgba(93,42,26,0.08)', color: '#1f6f5c' }}>
                           {singleOrder.gig_category}
                         </span>
                       )}
                     </div>
                     <h1 className="text-[44px] leading-tight tracking-[-0.66px] mb-2"
-                      style={{ fontFamily: 'var(--font-signifier)', fontWeight: 400, color: '#17191c' }}>
+                      style={{ fontFamily: 'var(--font-signifier)', fontWeight: 400, color: '#173a32' }}>
                       {singleOrder.title}
                     </h1>
                     {singleOrder.description && (
@@ -692,7 +692,7 @@ export default function MyOrders() {
                     )}
                   </div>
                   <div className="text-right shrink-0 ml-4">
-                    <p className="text-2xl font-bold" style={{ color: '#5d2a1a' }}>
+                    <p className="text-2xl font-bold" style={{ color: '#1f6f5c' }}>
                       ETB {Number(singleOrder.price).toLocaleString()}
                     </p>
                     {singleOrder.gig_delivery_time && (
@@ -705,7 +705,7 @@ export default function MyOrders() {
 
                 {singleOrder.requirements && (
                   <div className="mt-4 pt-4" style={{ borderTop: '1px solid #f2f2f3' }}>
-                    <h3 className="font-semibold mb-2 text-sm" style={{ color: '#17191c' }}>
+                    <h3 className="font-semibold mb-2 text-sm" style={{ color: '#173a32' }}>
                       <FileText size={14} className="inline mr-1.5" /> Requirements
                     </h3>
                     <p className="text-sm whitespace-pre-wrap" style={{ color: '#777b86' }}>{singleOrder.requirements}</p>
@@ -720,7 +720,7 @@ export default function MyOrders() {
 
               {/* Actions */}
               <div className="rounded-3xl p-6 space-y-3" style={{ backgroundColor: '#ffffff', border: '1px solid #f2f2f3' }}>
-                <h3 className="font-semibold text-sm" style={{ color: '#17191c' }}>Actions</h3>
+                <h3 className="font-semibold text-sm" style={{ color: '#173a32' }}>Actions</h3>
                 <div className="flex flex-wrap gap-2">
                   {isClient && singleOrder.status === 'pending' && (
                     <span className="text-sm py-2 px-4 rounded-full flex items-center gap-1.5" style={{ color: '#777b86', backgroundColor: '#f2f2f3' }}>
@@ -730,21 +730,21 @@ export default function MyOrders() {
                   {isClient && singleOrder.status === 'delivered' && (
                     <button onClick={() => handleAction(singleOrder.id, 'complete')}
                       className="inline-flex items-center gap-2 py-3 px-6 rounded-full text-sm font-semibold transition-all"
-                      style={{ backgroundColor: '#17191c', color: '#ffffff' }}>
+                      style={{ backgroundColor: '#173a32', color: '#ffffff' }}>
                       <CheckCircle size={16} /> Approve & Complete
                     </button>
                   )}
                   {!isClient && singleOrder.status === 'pending' && (
                     <button onClick={() => handleAction(singleOrder.id, 'accept')}
                       className="inline-flex items-center gap-2 py-3 px-6 rounded-full text-sm font-semibold transition-all"
-                      style={{ backgroundColor: '#17191c', color: '#ffffff' }}>
+                      style={{ backgroundColor: '#173a32', color: '#ffffff' }}>
                       <CheckCircle size={16} /> Accept Project
                     </button>
                   )}
                   {!isClient && singleOrder.status === 'accepted' && (singleOrder.transaction?.txn_status === 'confirmed' || singleOrder.transaction?.txn_status === 'released' || paymentConfirmedOrders.includes(singleOrder.id)) && (
                     <button onClick={() => handleAction(singleOrder.id, 'deliver')}
                       className="inline-flex items-center gap-2 py-3 px-6 rounded-full text-sm font-semibold transition-all"
-                      style={{ backgroundColor: '#17191c', color: '#ffffff' }}>
+                      style={{ backgroundColor: '#173a32', color: '#ffffff' }}>
                       <Upload size={16} /> Deliver Finished Work
                     </button>
                   )}
@@ -764,19 +764,19 @@ export default function MyOrders() {
                   )}
                   {singleOrder.status === 'completed' && (
                     <div className="p-4 rounded-2xl w-full" style={{ backgroundColor: 'rgba(251,225,209,0.3)' }}>
-                      <p className="font-semibold flex items-center justify-center gap-2 mb-3" style={{ color: '#5d2a1a' }}>
+                      <p className="font-semibold flex items-center justify-center gap-2 mb-3" style={{ color: '#1f6f5c' }}>
                         <CheckCircle size={18} />
                         Payment of ETB {Number(singleOrder.price).toLocaleString()} released!
                       </p>
                       {!reviewedOrders.includes(singleOrder.id) && (
                         <button onClick={() => openReviewForOrder(singleOrder, isClient)}
                           className="inline-flex items-center gap-2 py-2.5 px-5 rounded-full text-sm font-semibold transition-all"
-                          style={{ backgroundColor: '#17191c', color: '#ffffff' }}>
+                          style={{ backgroundColor: '#173a32', color: '#ffffff' }}>
                           <Star size={16} /> Leave a Review
                         </button>
                       )}
                       {reviewedOrders.includes(singleOrder.id) && (
-                        <span className="inline-flex items-center gap-1.5 text-xs" style={{ color: '#5d2a1a' }}>
+                        <span className="inline-flex items-center gap-1.5 text-xs" style={{ color: '#1f6f5c' }}>
                           <Star size={14} /> You reviewed this order
                         </span>
                       )}
@@ -795,7 +795,7 @@ export default function MyOrders() {
               {/* Deliveries section */}
               {singleOrder.deliveries && singleOrder.deliveries.length > 0 && (
                 <div className="rounded-3xl p-6" style={{ backgroundColor: '#ffffff', border: '1px solid #f2f2f3' }}>
-                  <h3 className="font-semibold text-sm mb-4 flex items-center gap-2" style={{ color: '#17191c' }}>
+                  <h3 className="font-semibold text-sm mb-4 flex items-center gap-2" style={{ color: '#173a32' }}>
                     <Package size={16} /> Deliveries
                   </h3>
                   <div className="space-y-3">
@@ -804,21 +804,21 @@ export default function MyOrders() {
                       try { delFiles = JSON.parse(del.files || '[]'); } catch {}
                       return (
                         <div key={del.id} className="p-4 rounded-2xl" style={{ backgroundColor: '#f2f2f3' }}>
-                          {del.message && <p className="text-sm mb-2" style={{ color: '#17191c' }}>{del.message}</p>}
+                          {del.message && <p className="text-sm mb-2" style={{ color: '#173a32' }}>{del.message}</p>}
                           <div className="flex flex-wrap gap-2">
                             {delFiles.slice(0, 5).map((f, fi) => {
                               const FIcon = getFileIcon(f.type);
                               return (
                                 <div key={fi} className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs"
                                   style={{ backgroundColor: '#ffffff' }}>
-                                  <FIcon size={12} style={{ color: '#5d2a1a' }} />
+                                  <FIcon size={12} style={{ color: '#1f6f5c' }} />
                                   <span className="truncate max-w-[120px]" style={{ color: '#777b86' }}>{f.name}</span>
                                   {(f.data || f.url) && (
                                     <a href={f.data || f.url}
                                       download={f.name}
                                       onClick={e => e.stopPropagation()}
                                       className="p-1 rounded-lg hover:bg-gray-100 transition-all shrink-0"
-                                      style={{ color: '#5d2a1a' }}
+                                      style={{ color: '#1f6f5c' }}
                                       title="Download">
                                       <Download size={10} />
                                     </a>
@@ -834,7 +834,7 @@ export default function MyOrders() {
                           </div>
                           <button onClick={() => handleViewFiles(del)}
                             className="mt-2 inline-flex items-center gap-1 text-xs font-medium transition-all"
-                            style={{ color: '#5d2a1a' }}>
+                            style={{ color: '#1f6f5c' }}>
                             <Eye size={12} /> View All Files
                           </button>
                         </div>
@@ -850,13 +850,13 @@ export default function MyOrders() {
               <CollabHub order={singleOrder} user={user} partnerName={otherName} />
 
               <div className="rounded-3xl p-5" style={{ backgroundColor: '#ffffff', border: '1px solid #f2f2f3' }}>
-                <h3 className="font-semibold text-sm mb-3" style={{ color: '#17191c' }}>{isClient ? 'Freelancer' : 'Client'}</h3>
+                <h3 className="font-semibold text-sm mb-3" style={{ color: '#173a32' }}>{isClient ? 'Freelancer' : 'Client'}</h3>
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg overflow-hidden shrink-0"
-                    style={{ backgroundColor: 'rgba(93,42,26,0.08)', color: '#5d2a1a' }}>
+                    style={{ backgroundColor: 'rgba(93,42,26,0.08)', color: '#1f6f5c' }}>
                     {otherPicture ? <img src={otherPicture} alt="" className="w-full h-full object-cover" /> : otherName?.charAt(0)}
                   </div>
-                  <p className="font-medium" style={{ color: '#17191c' }}>{otherName}</p>
+                  <p className="font-medium" style={{ color: '#173a32' }}>{otherName}</p>
                 </div>
               </div>
 
@@ -870,13 +870,13 @@ export default function MyOrders() {
                     <div className="w-10 h-10 rounded-2xl flex items-center justify-center"
                       style={{ backgroundColor: (paymentConfirmedOrders.includes(singleOrder.id) || singleOrder.transaction?.txn_status === 'confirmed') ? 'rgba(93,42,26,0.08)' : 'rgba(251,225,209,0.3)' }}>
                       {paymentConfirmedOrders.includes(singleOrder.id) || singleOrder.transaction?.txn_status === 'confirmed' ? (
-                        <CheckCircle size={18} style={{ color: '#5d2a1a' }} />
+                        <CheckCircle size={18} style={{ color: '#1f6f5c' }} />
                       ) : (
-                        <Lock size={18} style={{ color: '#5d2a1a' }} />
+                        <Lock size={18} style={{ color: '#1f6f5c' }} />
                       )}
                     </div>
                     <div>
-                      <h3 className="font-semibold text-sm" style={{ color: '#17191c' }}>
+                      <h3 className="font-semibold text-sm" style={{ color: '#173a32' }}>
                         {paymentConfirmedOrders.includes(singleOrder.id) || singleOrder.transaction?.txn_status === 'confirmed' ? 'Payment Confirmed' : 'Payment in Escrow'}
                       </h3>
                       <p style={{ color: '#777b86', fontSize: '11px' }}>
@@ -890,7 +890,7 @@ export default function MyOrders() {
                   <div className="p-3 rounded-xl mb-3" style={{ backgroundColor: '#f2f2f3' }}>
                     <div className="flex justify-between items-center text-sm">
                       <span style={{ color: '#777b86' }}>Amount in Escrow</span>
-                      <span className="font-bold text-lg" style={{ color: '#5d2a1a' }}>
+                      <span className="font-bold text-lg" style={{ color: '#1f6f5c' }}>
                         ETB {(singleOrder.transaction.amount || 0).toLocaleString()}
                       </span>
                     </div>
@@ -898,7 +898,7 @@ export default function MyOrders() {
 
                   {(paymentConfirmedOrders.includes(singleOrder.id) || singleOrder.transaction?.txn_status === 'confirmed') ? (
                     <div className="flex items-center gap-2 text-xs p-3 rounded-xl"
-                      style={{ color: '#5d2a1a', backgroundColor: 'rgba(251,225,209,0.3)' }}>
+                      style={{ color: '#1f6f5c', backgroundColor: 'rgba(251,225,209,0.3)' }}>
                       <CheckCircle size={14} />
                       <span>Payment confirmed. You can now deliver your work.</span>
                     </div>
@@ -910,7 +910,7 @@ export default function MyOrders() {
                         setShowPaymentConfirm(true);
                       }}
                       className="w-full py-3 rounded-full text-sm font-semibold transition-all flex items-center justify-center gap-2"
-                      style={{ backgroundColor: '#17191c', color: '#ffffff' }}
+                      style={{ backgroundColor: '#173a32', color: '#ffffff' }}
                     >
                       <Lock size={16} />
                       Confirm Payment — Biometric — ETB {(singleOrder.transaction.amount || 0).toLocaleString()}
@@ -920,7 +920,7 @@ export default function MyOrders() {
               )}
 
               <div className="rounded-3xl p-5" style={{ backgroundColor: '#ffffff', border: '1px solid #f2f2f3' }}>
-                <h3 className="font-semibold text-sm mb-3" style={{ color: '#17191c' }}>Order Info</h3>
+                <h3 className="font-semibold text-sm mb-3" style={{ color: '#173a32' }}>Order Info</h3>
                 <div className="space-y-2 text-sm">
                   {[
                     { label: 'Status', value: singleOrder.status.replace('_', ' ') },
@@ -930,7 +930,7 @@ export default function MyOrders() {
                   ].map((item, i) => (
                     <div key={i} className="flex justify-between">
                       <span style={{ color: '#777b86' }}>{item.label}</span>
-                      <span className={item.bold ? 'font-semibold' : ''} style={{ color: '#17191c' }}>{item.value}</span>
+                      <span className={item.bold ? 'font-semibold' : ''} style={{ color: '#173a32' }}>{item.value}</span>
                     </div>
                   ))}
                 </div>
@@ -1001,7 +1001,7 @@ export default function MyOrders() {
       <div className="max-w-6xl mx-auto">        <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-[44px] leading-tight tracking-[-0.66px] mb-2"
-              style={{ fontFamily: 'var(--font-signifier)', fontWeight: 400, color: '#17191c' }}>
+              style={{ fontFamily: 'var(--font-signifier)', fontWeight: 400, color: '#173a32' }}>
               My Orders
             </h1>
             <p style={{ color: '#777b86', fontSize: '17px' }}>
@@ -1018,22 +1018,22 @@ export default function MyOrders() {
             </button>
             <Link to="/marketplace"
               className="inline-flex items-center gap-2 py-2.5 px-5 rounded-full text-sm font-semibold transition-all"
-              style={{ backgroundColor: '#17191c', color: '#ffffff' }}>
+              style={{ backgroundColor: '#173a32', color: '#ffffff' }}>
               <ShoppingCart size={16} /> Browse Gigs
             </Link>
           </div>
         </div>
 
         {fetchError ? (
-          <div className="rounded-3xl p-12 text-center" style={{ backgroundColor: '#fafafb', border: '1px solid #fbe1d1' }}>
-            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style={{ backgroundColor: '#fbe1d1' }}>
-              <AlertTriangle size={32} style={{ color: '#5d2a1a' }} />
+          <div className="rounded-3xl p-12 text-center" style={{ backgroundColor: '#fafafb', border: '1px solid #e7f5ef' }}>
+            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style={{ backgroundColor: '#e7f5ef' }}>
+              <AlertTriangle size={32} style={{ color: '#1f6f5c' }} />
             </div>
-            <h3 className="text-xl font-semibold mb-2" style={{ color: '#17191c' }}>Could not load orders</h3>
+            <h3 className="text-xl font-semibold mb-2" style={{ color: '#173a32' }}>Could not load orders</h3>
             <p style={{ color: '#777b86', fontSize: '15px' }} className="mb-6 max-w-md mx-auto">{fetchError}</p>
             <button onClick={loadOrders}
               className="inline-flex items-center gap-2 py-3 px-6 rounded-full text-sm font-semibold transition-all"
-              style={{ backgroundColor: '#17191c', color: '#ffffff' }}>
+              style={{ backgroundColor: '#173a32', color: '#ffffff' }}>
               <RefreshCw size={16} /> Try Again
             </button>
           </div>
@@ -1042,7 +1042,7 @@ export default function MyOrders() {
             <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style={{ backgroundColor: '#f2f2f3' }}>
               <Package size={32} style={{ color: '#979799' }} />
             </div>
-            <h3 className="text-xl font-semibold mb-2" style={{ color: '#17191c' }}>No orders yet</h3>
+            <h3 className="text-xl font-semibold mb-2" style={{ color: '#173a32' }}>No orders yet</h3>
             <p style={{ color: '#777b86', fontSize: '15px' }} className="mb-6">
               {user?.role === 'freelancer'
                 ? 'When clients order your gigs, they will appear here.'
@@ -1050,7 +1050,7 @@ export default function MyOrders() {
             </p>
             <Link to="/marketplace"
               className="inline-flex items-center gap-2 py-3 px-6 rounded-full text-sm font-semibold transition-all"
-              style={{ backgroundColor: '#17191c', color: '#ffffff' }}>
+              style={{ backgroundColor: '#173a32', color: '#ffffff' }}>
               <ShoppingCart size={16} /> Browse Marketplace
             </Link>
           </div>

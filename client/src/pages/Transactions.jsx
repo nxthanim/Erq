@@ -11,8 +11,8 @@ import {
 
 const statusConfig = {
   escrow: { label: 'In Escrow', color: '#b45309', bg: 'rgba(251,225,209,0.3)', icon: Lock },
-  confirmed: { label: 'Confirmed', color: '#5d2a1a', bg: 'rgba(251,225,209,0.2)', icon: CheckCircle },
-  released: { label: 'Released', color: '#5d2a1a', bg: 'rgba(93,42,26,0.08)', icon: CheckCircle },
+  confirmed: { label: 'Confirmed', color: '#1f6f5c', bg: 'rgba(251,225,209,0.2)', icon: CheckCircle },
+  released: { label: 'Released', color: '#1f6f5c', bg: 'rgba(93,42,26,0.08)', icon: CheckCircle },
   refunded: { label: 'Refunded', color: '#777b86', bg: '#f2f2f3', icon: AlertTriangle },
   disputed: { label: 'Disputed', color: '#777b86', bg: '#f2f2f3', icon: AlertTriangle },
 };
@@ -67,7 +67,7 @@ export default function Transactions() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-[44px] leading-tight tracking-[-0.66px] mb-2" style={{ fontFamily: 'var(--font-signifier)', fontWeight: 400, color: '#17191c' }}>
+          <h1 className="text-[44px] leading-tight tracking-[-0.66px] mb-2" style={{ fontFamily: 'var(--font-signifier)', fontWeight: 400, color: '#173a32' }}>
             Transaction History
           </h1>
           <p style={{ color: '#777b86', fontSize: '17px', lineHeight: 1.35 }}>
@@ -88,10 +88,10 @@ export default function Transactions() {
             >
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ backgroundColor: '#ffffff' }}>
-                  <stat.icon size={18} style={{ color: '#17191c' }} />
+                  <stat.icon size={18} style={{ color: '#173a32' }} />
                 </div>
               </div>
-              <p className="text-2xl font-bold mb-1" style={{ color: '#17191c', fontFamily: 'var(--font-sohne)' }}>
+              <p className="text-2xl font-bold mb-1" style={{ color: '#173a32', fontFamily: 'var(--font-sohne)' }}>
                 {stat.isCount ? stat.value : `ETB ${(stat.value || 0).toLocaleString()}`}
               </p>
               <p style={{ color: '#777b86', fontSize: '14px' }}>{stat.label}</p>
@@ -114,7 +114,7 @@ export default function Transactions() {
             <button key={f.id} onClick={() => setFilter(f.id)}
               className="rounded-full px-4 py-1.5 text-xs font-medium transition-all"
               style={{
-                backgroundColor: filter === f.id ? '#17191c' : 'transparent',
+                backgroundColor: filter === f.id ? '#173a32' : 'transparent',
                 color: filter === f.id ? '#ffffff' : '#777b86',
                 border: filter === f.id ? 'none' : '1px solid #ececec',
               }}
@@ -130,7 +130,7 @@ export default function Transactions() {
             <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style={{ backgroundColor: '#f2f2f3' }}>
               <Wallet size={32} style={{ color: '#979799' }} />
             </div>
-            <h3 className="text-xl font-semibold mb-2" style={{ color: '#17191c' }}>No transactions found</h3>
+            <h3 className="text-xl font-semibold mb-2" style={{ color: '#173a32' }}>No transactions found</h3>
             <p style={{ color: '#777b86', fontSize: '15px' }}>
               {filter === 'all' ? 'Your transactions will appear here once you start working.' : `No ${filter} transactions.`}
             </p>
@@ -153,10 +153,10 @@ export default function Transactions() {
                     <div className="flex items-start gap-3">
                       <div className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0"
                         style={{ backgroundColor: incoming ? 'rgba(93,42,26,0.08)' : '#f2f2f3' }}>
-                        {incoming ? <ArrowDownLeft size={18} style={{ color: '#5d2a1a' }} /> : <ArrowUpRight size={18} style={{ color: '#777b86' }} />}
+                        {incoming ? <ArrowDownLeft size={18} style={{ color: '#1f6f5c' }} /> : <ArrowUpRight size={18} style={{ color: '#777b86' }} />}
                       </div>
                       <div>
-                        <p className="font-medium text-sm" style={{ color: '#17191c' }}>{txn.job_title || 'Transaction'}</p>
+                        <p className="font-medium text-sm" style={{ color: '#173a32' }}>{txn.job_title || 'Transaction'}</p>
                         <p style={{ color: '#777b86', fontSize: '13px', marginTop: '2px' }}>
                           {incoming ? `From: ${txn.client_name || 'Client'}` : `To: ${txn.freelancer_name || 'Freelancer'}`}
                         </p>
@@ -173,7 +173,7 @@ export default function Transactions() {
                       </div>
                     </div>
                     <div className="text-right shrink-0 ml-4">
-                      <p className="text-base font-bold" style={{ color: incoming ? '#5d2a1a' : '#777b86' }}>
+                      <p className="text-base font-bold" style={{ color: incoming ? '#1f6f5c' : '#777b86' }}>
                         {incoming ? '+' : '-'} ETB {(txn.amount || 0).toLocaleString()}
                       </p>
                       {txn.telebirr_reference && (

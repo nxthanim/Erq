@@ -2,17 +2,16 @@ import { useState, useRef, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { gigsAPI } from '../utils/api';
+import { MARKETPLACE_CATEGORIES } from '../data/categories';
 import { Plus, X, AlertCircle, Image as ImageIcon } from 'lucide-react';
 import AppAvatar from '../components/ui/avatar';
-
-const categories = ['Translation', 'Graphic Design', 'Video Editing', 'Web Development', 'Virtual Assistant', 'Social Media Management'];
 
 export default function CreateGig() {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const previewRef = useRef(null);
   const [form, setForm] = useState({
-    title: '', description: '', price: '', category: '', deliveryTime: ''
+    title: '', description: '', price: '', category: '', customCategory: '', deliveryTime: ''
   });
   const [files, setFiles] = useState([]);
   const [portfolioFiles, setPortfolioFiles] = useState([]);
@@ -26,16 +25,15 @@ export default function CreateGig() {
     setError('');
     setLoading(true);
     try {
-      const formData = new FormData();
-      formData.append('title', form.title);
-      formData.append('description', form.description);
-      formData.append('price', form.price);
-      formData.append('category', form.category);
-      formData.append('deliveryTime', form.deliveryTime);
-      const allFiles = [...files, ...portfolioFiles, ...docs];
-      allFiles.forEach(f => formData.append('portfolio_images', f));
-
-      const res = await gigsAPI.create(formData);
+      // The backend expects a JSON body (GigCreateRequest); file upload for
+      // portfolio images is not yet supported server-side, so send JSON only.
+      const res = await gigsAPI.create({
+        title: form.title,
+        description: form.description,
+        price: parseFloat(form.price),
+        category: form.category === 'Custom Category' ? form.customCategory.trim() : form.category,
+        deliveryTime: parseInt(form.deliveryTime, 10),
+      });
       navigate(`/gigs/${res.data.gig.id}`);
     } catch (err) {
       const serverError = err.response?.data?.error || '';
@@ -96,8 +94,9 @@ export default function CreateGig() {
             <label className="block text-sm font-medium text-ice-700 mb-1.5">{t('gig.category')}</label>
             <select required value={form.category} onChange={e => setForm({...form, category: e.target.value})} className="input-field">
               <option value="">Select...</option>
-              {categories.map(c => <option key={c} value={c}>{c}</option>)}
+              {MARKETPLACE_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
+            {form.category === 'Custom Category' && <input required value={form.customCategory} onChange={e => setForm({...form, customCategory: e.target.value})} className="input-field mt-2" placeholder="Enter your category" />}
           </div>
           <div>
             <label className="block text-sm font-medium text-ice-700 mb-1.5">{t('gig.price')}</label>
@@ -113,11 +112,14 @@ export default function CreateGig() {
 
         {/* Portfolio Images — exactly 4 required like Fiverr */}
         <div>
-          <label className="block text-sm font-medium mb-2" style={{ color: '#17191c' }}>
-            Portfolio Images <span style={{ color: '#5d2a1a' }}>*</span>
+          <label className="block text-sm font-medium mb-2" style={{ color: '#173a32' }}>
+            Portfolio Images <span style={{ color: '#1f6f5c' }}>*</span>
           </label>
           <p style={{ color: '#777b86', fontSize: '13px' }} className="mb-3">
             Add exactly <strong>4 images</strong> to showcase your work — buyers expect to see previews before ordering.
+          </p>
+          <p style={{ color: '#979799', fontSize: '12px' }} className="mb-3">
+            Note: images are shown in the live preview only — file upload isn't wired to the backend yet, so your gig will publish without attached files.
           </p>
           <div className="grid grid-cols-4 gap-3">
             {[0, 1, 2, 3].map(idx => {
@@ -125,7 +127,7 @@ export default function CreateGig() {
               const url = file ? URL.createObjectURL(file) : null;
               return (
                 <div key={idx} className="relative aspect-[4/3] rounded-2xl overflow-hidden cursor-pointer group"
-                  style={{ backgroundColor: '#f2f2f3', border: file ? '2px solid #5d2a1a' : '2px dashed #ececec' }}
+                  style={{ backgroundColor: '#f2f2f3', border: file ? '2px solid #1f6f5c' : '2px dashed #ececec' }}
                   onClick={() => {
                     const input = document.createElement('input');
                     input.type = 'file';
@@ -167,7 +169,7 @@ export default function CreateGig() {
             })}
           </div>
           {files.length < 4 && files.length > 0 && (
-            <p className="mt-2 text-xs flex items-center gap-1" style={{ color: '#5d2a1a' }}>
+            <p className="mt-2 text-xs flex items-center gap-1" style={{ color: '#1f6f5c' }}>
               <AlertCircle size={12} /> Add {4 - files.length} more image{files.length !== 3 ? 's' : ''} to meet the minimum requirement
             </p>
           )}

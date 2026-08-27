@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { SignUp } from '@clerk/clerk-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { motion, AnimatePresence } from "motion/react";
 import EmailVerification from '../components/EmailVerification';
-import { BadgeCheck, Shield, Mail, Globe, Briefcase, Handshake, Sparkles, ArrowRight } from 'lucide-react';
+import { BadgeCheck, Shield, Mail, Globe, Briefcase, Handshake, Users, Zap } from 'lucide-react';
+
+const CLERK_ENABLED = Boolean(import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
 
 export default function Signup() {
   const { signup } = useAuth();
@@ -33,38 +36,82 @@ export default function Signup() {
 
   const cities = ['Addis Ababa', 'Dire Dawa', 'Mekelle', 'Bahir Dar', 'Gondar', 'Hawassa', 'Adama', 'Jimma'];
 
+  // Post-login navigation is owned by the AuthContext bridge (ClerkAuthBridge),
+  // which uses useNavigate so it never fights React Router.
+
+  if (CLERK_ENABLED) {
+    return (
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}
+        className="min-h-screen flex" style={{ backgroundColor: '#ffffff' }}>
+        {/* Left — Brand Panel */}
+        <div className="hidden md:flex w-1/2 relative overflow-hidden items-center justify-center p-16" style={{ backgroundColor: '#173a32' }}>
+          <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 70% 15%, rgba(251,225,209,0.14) 0%, transparent 55%)' }} />
+          <div className="relative text-center max-w-sm">
+            <div className="w-14 h-14 rounded-[16px] flex items-center justify-center mx-auto mb-8 overflow-hidden" style={{ backgroundColor: '#ffffff' }}>
+              <img src="/high-resolution-color-logo.png" alt="Erq" className="h-9 w-auto no-grayscale" />
+            </div>
+            <h2 className="text-balance" style={{ fontFamily: 'var(--font-sohne)', fontWeight: 600, fontSize: 'clamp(30px, 3.6vw, 42px)', color: '#ffffff', letterSpacing: '-1px', lineHeight: '1.15', marginBottom: '16px' }}>
+              Join <span className="accent-word" style={{ color: '#e7f5ef' }}>Erq</span> Today
+            </h2>
+            <p className="text-base" style={{ color: 'rgba(255,255,255,0.7)', fontFamily: 'var(--font-sohne)' }}>
+              Start your journey — whether you're looking for talent or offering your skills.
+            </p>
+          </div>
+        </div>
+        {/* Right — Clerk SignUp */}
+        <div className="w-full md:w-1/2 flex items-center justify-center p-6 md:p-16">
+          <div className="w-full max-w-md">
+            <div className="mb-6">
+              <h1 className="text-balance" style={{ fontFamily: 'var(--font-sohne)', fontWeight: 600, fontSize: 'clamp(28px, 3vw, 36px)', color: '#173a32', letterSpacing: '-0.8px', marginBottom: '8px' }}>{t('auth.signup')}</h1>
+              <p style={{ color: '#777b86', fontFamily: 'var(--font-sohne)' }}>
+                {t('auth.have.account')}{' '}
+                <Link to="/login" style={{ color: '#1f6f5c', textDecoration: 'underline', textUnderlineOffset: '3px' }}>{t('auth.login.btn')}</Link>
+              </p>
+            </div>
+            <SignUp
+              signInUrl="/login"
+            />
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}
       className="min-h-screen flex" style={{ backgroundColor: '#ffffff' }}>
       
-      {/* Left — Brand Panel (Steep editorial peach) */}
+      {/* Left — Brand Panel (Fiverr-style dark ink) */}
       <motion.div 
         initial={{ opacity: 0, x: -30 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="hidden md:flex w-1/2 relative flex-col items-center justify-center p-16"
-        style={{ backgroundColor: '#fbe1d1' }}
+        className="hidden md:flex w-1/2 relative overflow-hidden flex-col items-center justify-center p-16"
+        style={{ backgroundColor: '#173a32' }}
       >
+        {/* Warm glow + subtle grid texture */}
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 70% 15%, rgba(251,225,209,0.14) 0%, transparent 55%)' }} />
+        <div className="absolute inset-0 pointer-events-none opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
+
         <div className="relative text-center max-w-sm">
-          {/* Logo mark */}
-          <div className="w-16 h-16 rounded-[20px] flex items-center justify-center mx-auto mb-8"
-            style={{ backgroundColor: '#5d2a1a' }}>
-            <span style={{ fontFamily: 'var(--font-signifier)', color: '#fbe1d1', fontSize: '28px', lineHeight: 1 }}>E</span>
+          {/* Logo */}
+          <div className="w-14 h-14 rounded-[16px] flex items-center justify-center mx-auto mb-8 overflow-hidden" style={{ backgroundColor: '#ffffff', boxShadow: '0 16px 40px rgba(0,0,0,0.35)' }}>
+            <img src="/high-resolution-color-logo.png" alt="Erq" className="h-9 w-auto no-grayscale" />
           </div>
 
-          <h2 style={{
-            fontFamily: 'var(--font-signifier)',
-            fontWeight: 400,
-            fontSize: 'clamp(32px, 4vw, 44px)',
-            color: '#5d2a1a',
-            letterSpacing: '-0.66px',
-            lineHeight: '1.2',
+          <h2 className="text-balance" style={{
+            fontFamily: 'var(--font-sohne)',
+            fontWeight: 600,
+            fontSize: 'clamp(30px, 3.6vw, 42px)',
+            color: '#ffffff',
+            letterSpacing: '-1px',
+            lineHeight: '1.15',
             marginBottom: '16px',
           }}>
-            Join <span style={{ fontStyle: 'italic' }}>Erq</span> Today
+            Join <span className="accent-word" style={{ color: '#e7f5ef' }}>Erq</span> Today
           </h2>
           
-          <p className="text-lg mb-10" style={{ color: '#5d2a1a', fontFamily: 'var(--font-sohne)', opacity: 0.75 }}>
+          <p className="text-base mb-10" style={{ color: 'rgba(255,255,255,0.7)', fontFamily: 'var(--font-sohne)' }}>
             Start your journey — whether you're looking for talent or offering your skills.
           </p>
 
@@ -73,26 +120,42 @@ export default function Signup() {
               { 
                 title: 'For Freelancers', 
                 desc: 'Showcase your skills and find work',
-                icon: <Briefcase size={20} style={{ color: '#5d2a1a' }} /> 
+                icon: <Briefcase size={20} style={{ color: '#e7f5ef' }} /> 
               },
               { 
                 title: 'For Clients', 
                 desc: 'Post jobs and hire top talent',
-                icon: <Handshake size={20} style={{ color: '#5d2a1a' }} /> 
+                icon: <Handshake size={20} style={{ color: '#e7f5ef' }} /> 
               },
             ].map((item) => (
               <div key={item.title} className="flex items-center gap-4 p-4"
-                style={{ backgroundColor: 'rgba(255,255,255,0.4)', borderRadius: '20px' }}>
+                style={{ backgroundColor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px' }}>
                 <div className="w-10 h-10 rounded-[14px] flex items-center justify-center shrink-0"
-                  style={{ backgroundColor: 'rgba(93,42,26,0.1)' }}>
+                  style={{ backgroundColor: 'rgba(251,225,209,0.12)' }}>
                   {item.icon}
                 </div>
                 <div>
-                  <p className="font-medium" style={{ color: '#5d2a1a', fontFamily: 'var(--font-sohne)', fontWeight: 450 }}>{item.title}</p>
-                  <p className="text-sm" style={{ color: '#5d2a1a', fontFamily: 'var(--font-sohne)', opacity: 0.6 }}>{item.desc}</p>
+                  <p className="font-medium" style={{ color: '#ffffff', fontFamily: 'var(--font-sohne)', fontWeight: 500 }}>{item.title}</p>
+                  <p className="text-sm" style={{ color: 'rgba(255,255,255,0.55)', fontFamily: 'var(--font-sohne)' }}>{item.desc}</p>
                 </div>
               </div>
             ))}
+
+            {/* Trust chips */}
+            <div className="flex justify-center gap-3 pt-2">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ backgroundColor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                <Shield size={13} style={{ color: '#e7f5ef' }} />
+                <span className="text-xs" style={{ color: 'rgba(255,255,255,0.8)', fontFamily: 'var(--font-sohne)' }}>TeleBirr escrow</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ backgroundColor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                <Users size={13} style={{ color: '#e7f5ef' }} />
+                <span className="text-xs" style={{ color: 'rgba(255,255,255,0.8)', fontFamily: 'var(--font-sohne)' }}>500+ freelancers</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ backgroundColor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                <Zap size={13} style={{ color: '#e7f5ef' }} />
+                <span className="text-xs" style={{ color: 'rgba(255,255,255,0.8)', fontFamily: 'var(--font-sohne)' }}>Fast matching</span>
+              </div>
+            </div>
           </div>
         </div>
       </motion.div>
@@ -117,17 +180,17 @@ export default function Signup() {
 
           {/* Heading */}
           <div className="mb-8">
-            <h1 style={{
-              fontFamily: 'var(--font-signifier)',
-              fontWeight: 400,
-              fontSize: '36px',
-              color: '#17191c',
-              letterSpacing: '-0.66px',
+            <h1 className="text-balance" style={{
+              fontFamily: 'var(--font-sohne)',
+              fontWeight: 600,
+              fontSize: 'clamp(28px, 3vw, 36px)',
+              color: '#173a32',
+              letterSpacing: '-0.8px',
               marginBottom: '8px',
             }}>{t('auth.signup')}</h1>
             <p style={{ color: '#777b86', fontFamily: 'var(--font-sohne)' }}>
               {t('auth.have.account')}{' '}
-              <Link to="/login" style={{ color: '#5d2a1a', textDecoration: 'underline', textUnderlineOffset: '3px' }}>{t('auth.login.btn')}</Link>
+              <Link to="/login" style={{ color: '#1f6f5c', textDecoration: 'underline', textUnderlineOffset: '3px' }}>{t('auth.login.btn')}</Link>
             </p>
           </div>
 
@@ -139,7 +202,7 @@ export default function Signup() {
             )}
 
             <div>
-              <label htmlFor="signup-fullname" className="block text-sm mb-1.5" style={{ color: '#17191c', fontFamily: 'var(--font-sohne)', fontWeight: 450 }}>{t('auth.fullname')}</label>
+              <label htmlFor="signup-fullname" className="block text-sm mb-1.5" style={{ color: '#173a32', fontFamily: 'var(--font-sohne)', fontWeight: 450 }}>{t('auth.fullname')}</label>
               <input
                 id="signup-fullname"
                 name="fullName"
@@ -152,7 +215,7 @@ export default function Signup() {
                   padding: '14px 16px',
                   border: '1px solid #ececec',
                   backgroundColor: '#ffffff',
-                  color: '#17191c',
+                  color: '#173a32',
                   fontFamily: 'var(--font-sohne)',
                   fontSize: '15px',
                   width: '100%',
@@ -163,7 +226,7 @@ export default function Signup() {
             </div>
 
             <div>
-              <label htmlFor="signup-email" className="block text-sm mb-1.5" style={{ color: '#17191c', fontFamily: 'var(--font-sohne)', fontWeight: 450 }}>
+              <label htmlFor="signup-email" className="block text-sm mb-1.5" style={{ color: '#173a32', fontFamily: 'var(--font-sohne)', fontWeight: 450 }}>
                 <span className="flex items-center gap-1.5">
                   {t('auth.email')}
                   {emailVerified && (
@@ -171,7 +234,7 @@ export default function Signup() {
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full"
-                      style={{ backgroundColor: 'rgba(93,42,26,0.1)', color: '#5d2a1a' }}
+                      style={{ backgroundColor: 'rgba(93,42,26,0.1)', color: '#1f6f5c' }}
                     >
                       <BadgeCheck size={10} />
                       Verified
@@ -193,9 +256,9 @@ export default function Signup() {
                   style={{
                     borderRadius: '16px',
                     padding: '14px 40px 14px 16px',
-                    border: emailVerified ? '1px solid #5d2a1a' : '1px solid #ececec',
+                    border: emailVerified ? '1px solid #1f6f5c' : '1px solid #ececec',
                     backgroundColor: emailVerified ? 'rgba(251,225,209,0.15)' : '#ffffff',
-                    color: '#17191c',
+                    color: '#173a32',
                     fontFamily: 'var(--font-sohne)',
                     fontSize: '15px',
                     width: '100%',
@@ -204,7 +267,7 @@ export default function Signup() {
                   placeholder="abebe@example.com"
                 />
                 {emailVerified && (
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: '#5d2a1a' }}>
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: '#1f6f5c' }}>
                     <Shield size={16} />
                   </div>
                 )}
@@ -222,7 +285,7 @@ export default function Signup() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="signup-phone" className="block text-sm mb-1.5" style={{ color: '#17191c', fontFamily: 'var(--font-sohne)', fontWeight: 450 }}>{t('auth.phone')}</label>
+                <label htmlFor="signup-phone" className="block text-sm mb-1.5" style={{ color: '#173a32', fontFamily: 'var(--font-sohne)', fontWeight: 450 }}>{t('auth.phone')}</label>
                 <input
                   id="signup-phone"
                   name="phone"
@@ -234,7 +297,7 @@ export default function Signup() {
                     padding: '14px 16px',
                     border: '1px solid #ececec',
                     backgroundColor: '#ffffff',
-                    color: '#17191c',
+                    color: '#173a32',
                     fontFamily: 'var(--font-sohne)',
                     fontSize: '15px',
                     width: '100%',
@@ -244,7 +307,7 @@ export default function Signup() {
                 />
               </div>
               <div>
-                <label htmlFor="signup-city" className="block text-sm mb-1.5" style={{ color: '#17191c', fontFamily: 'var(--font-sohne)', fontWeight: 450 }}>{t('auth.city')}</label>
+                <label htmlFor="signup-city" className="block text-sm mb-1.5" style={{ color: '#173a32', fontFamily: 'var(--font-sohne)', fontWeight: 450 }}>{t('auth.city')}</label>
                 <select
                   id="signup-city"
                   name="city"
@@ -255,7 +318,7 @@ export default function Signup() {
                     padding: '14px 16px',
                     border: '1px solid #ececec',
                     backgroundColor: '#ffffff',
-                    color: '#17191c',
+                    color: '#173a32',
                     fontFamily: 'var(--font-sohne)',
                     fontSize: '15px',
                     width: '100%',
@@ -273,7 +336,7 @@ export default function Signup() {
             </div>
 
             <div>
-              <label htmlFor="signup-password" className="block text-sm mb-1.5" style={{ color: '#17191c', fontFamily: 'var(--font-sohne)', fontWeight: 450 }}>{t('auth.password')}</label>
+              <label htmlFor="signup-password" className="block text-sm mb-1.5" style={{ color: '#173a32', fontFamily: 'var(--font-sohne)', fontWeight: 450 }}>{t('auth.password')}</label>
               <input
                 id="signup-password"
                 name="password"
@@ -287,7 +350,7 @@ export default function Signup() {
                   padding: '14px 16px',
                   border: '1px solid #ececec',
                   backgroundColor: '#ffffff',
-                  color: '#17191c',
+                  color: '#173a32',
                   fontFamily: 'var(--font-sohne)',
                   fontSize: '15px',
                   width: '100%',
@@ -299,33 +362,33 @@ export default function Signup() {
 
             {/* Role Selector */}
             <div>
-              <label className="block text-sm mb-2" style={{ color: '#17191c', fontFamily: 'var(--font-sohne)', fontWeight: 450 }}>{t('auth.role')}</label>
+              <label className="block text-sm mb-2" style={{ color: '#173a32', fontFamily: 'var(--font-sohne)', fontWeight: 450 }}>{t('auth.role')}</label>
               <div className="grid grid-cols-2 gap-3">
                 <button type="button" onClick={() => setForm({...form, role: 'freelancer'})}
                   style={{
                     padding: '16px',
                     borderRadius: '16px',
-                    border: form.role === 'freelancer' ? '2px solid #5d2a1a' : '2px solid #ececec',
+                    border: form.role === 'freelancer' ? '2px solid #1f6f5c' : '2px solid #ececec',
                     backgroundColor: form.role === 'freelancer' ? 'rgba(251,225,209,0.2)' : '#ffffff',
                     transition: 'all 0.2s',
                     textAlign: 'center',
                     cursor: 'pointer',
                   }}>
-                  <Briefcase size={22} className="block mx-auto mb-1" style={{ color: form.role === 'freelancer' ? '#5d2a1a' : '#979799' }} />
-                  <span className="text-sm font-medium" style={{ color: form.role === 'freelancer' ? '#5d2a1a' : '#777b86' }}>{t('auth.freelancer')}</span>
+                  <Briefcase size={22} className="block mx-auto mb-1" style={{ color: form.role === 'freelancer' ? '#1f6f5c' : '#979799' }} />
+                  <span className="text-sm font-medium" style={{ color: form.role === 'freelancer' ? '#1f6f5c' : '#777b86' }}>{t('auth.freelancer')}</span>
                 </button>
                 <button type="button" onClick={() => setForm({...form, role: 'client'})}
                   style={{
                     padding: '16px',
                     borderRadius: '16px',
-                    border: form.role === 'client' ? '2px solid #5d2a1a' : '2px solid #ececec',
+                    border: form.role === 'client' ? '2px solid #1f6f5c' : '2px solid #ececec',
                     backgroundColor: form.role === 'client' ? 'rgba(251,225,209,0.2)' : '#ffffff',
                     transition: 'all 0.2s',
                     textAlign: 'center',
                     cursor: 'pointer',
                   }}>
-                  <Handshake size={22} className="block mx-auto mb-1" style={{ color: form.role === 'client' ? '#5d2a1a' : '#979799' }} />
-                  <span className="text-sm font-medium" style={{ color: form.role === 'client' ? '#5d2a1a' : '#777b86' }}>{t('auth.client')}</span>
+                  <Handshake size={22} className="block mx-auto mb-1" style={{ color: form.role === 'client' ? '#1f6f5c' : '#979799' }} />
+                  <span className="text-sm font-medium" style={{ color: form.role === 'client' ? '#1f6f5c' : '#777b86' }}>{t('auth.client')}</span>
                 </button>
               </div>
             </div>
@@ -335,7 +398,7 @@ export default function Signup() {
                 initial={{ opacity: 0, y: 5 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="text-sm px-4 py-3 flex items-start gap-2"
-                style={{ backgroundColor: 'rgba(251,225,209,0.3)', color: '#5d2a1a', borderRadius: '16px' }}
+                style={{ backgroundColor: 'rgba(251,225,209,0.3)', color: '#1f6f5c', borderRadius: '16px' }}
               >
                 <Shield size={14} className="mt-0.5 flex-shrink-0" />
                 <span>Please verify your email address above before signing up.</span>

@@ -12,7 +12,7 @@ const TABS = [
 
 function LeaderboardCard({ freelancer, rank }) {
   const medals = {
-    1: <Trophy size={16} style={{ color: '#5d2a1a' }} />,
+    1: <Trophy size={16} style={{ color: '#1f6f5c' }} />,
     2: <Medal size={16} style={{ color: '#979799' }} />,
     3: <Award size={16} style={{ color: '#a3a6af' }} />,
   };
@@ -21,7 +21,7 @@ function LeaderboardCard({ freelancer, rank }) {
     <Link to={`/freelancers/${freelancer.id}`}
       className="flex items-center gap-3 p-3 rounded-[16px] transition-all hover:bg-[#fafafb] group">
       <div className="w-8 h-8 rounded-[12px] flex items-center justify-center shrink-0 font-bold text-sm"
-        style={{ color: rank <= 3 ? '#5d2a1a' : '#a3a6af' }}>
+        style={{ color: rank <= 3 ? '#1f6f5c' : '#a3a6af' }}>
         {medals[rank] || <span>#{rank}</span>}
       </div>
 
@@ -35,7 +35,7 @@ function LeaderboardCard({ freelancer, rank }) {
       </div>
 
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate" style={{ color: '#17191c' }}>
+        <p className="text-sm font-medium truncate" style={{ color: '#173a32' }}>
           {freelancer.full_name}
         </p>
         <p className="text-xs truncate" style={{ color: '#979799' }}>
@@ -45,8 +45,8 @@ function LeaderboardCard({ freelancer, rank }) {
 
       <div className="text-right shrink-0">
         {freelancer.rating && (
-          <p className="text-sm font-medium flex items-center gap-1 justify-end" style={{ color: '#17191c' }}>
-            <Star size={12} style={{ color: '#5d2a1a' }} />
+          <p className="text-sm font-medium flex items-center gap-1 justify-end" style={{ color: '#173a32' }}>
+            <Star size={12} style={{ color: '#1f6f5c' }} />
             {freelancer.rating.toFixed(1)}
           </p>
         )}
@@ -75,8 +75,8 @@ export default function FreelancerLeaderboard() {
     <div className="overflow-hidden" style={{ backgroundColor: '#f2f2f3', borderRadius: '24px' }}>
       <div className="p-5" style={{ borderBottom: '1px solid #e5e5e7' }}>
         <div className="flex items-center gap-2 mb-3">
-          <Trophy size={20} style={{ color: '#5d2a1a' }} />
-          <h3 className="text-lg" style={{ fontFamily: 'var(--font-signifier)', color: '#17191c', fontWeight: 400 }}>Top Freelancers</h3>
+          <Trophy size={20} style={{ color: '#1f6f5c' }} />
+          <h3 className="text-lg" style={{ fontFamily: 'var(--font-signifier)', color: '#173a32', fontWeight: 400 }}>Top Freelancers</h3>
         </div>
 
         <div className="flex gap-1.5">
@@ -88,7 +88,7 @@ export default function FreelancerLeaderboard() {
                   : ''
               }`}
               style={{
-                backgroundColor: activeTab === tab.id ? '#17191c' : '#e5e5e7',
+                backgroundColor: activeTab === tab.id ? '#173a32' : '#e5e5e7',
                 color: activeTab === tab.id ? '#ffffff' : '#777b86',
               }}>
               {tab.icon} {tab.label}

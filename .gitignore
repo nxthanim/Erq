@@ -12,3 +12,8 @@ client/dist/
 .vercel
 server/data/
 data/
+.env*
+.env
+.env.local
+.env.vercel
+.env.production

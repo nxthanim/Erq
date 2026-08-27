@@ -22,8 +22,13 @@ export function SocketProvider({ children }) {
   const watchedCacheRef = useRef(new Set());
 
   // ====== SOCKET.IO CONNECTION ======
+  // The FastAPI deployment uses HTTP polling for presence by default. Only
+  // create a Socket.IO client when an explicit compatible endpoint is set;
+  // otherwise an io('/') client repeatedly hits an unsupported /socket.io
+  // polling route and floods the console with 404 errors.
+  const socketUrl = import.meta.env.VITE_SOCKET_URL;
   useEffect(() => {
-    if (!user) {
+    if (!user || !socketUrl) {
       if (socket) {
         socket.disconnect();
         setSocket(null);
@@ -77,7 +82,7 @@ export function SocketProvider({ children }) {
       newSocket.disconnect();
       setSocketConnected(false);
     };
-  }, [user]);
+  }, [user, socketUrl]);
 
   // ====== HTTP POLLING FALLBACK for online status ======
   // When socket is not available (e.g. Vercel serverless), poll via HTTP

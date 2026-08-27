@@ -12,6 +12,13 @@ export default function FreelancerProfile() {
   const [freelancer, setFreelancer] = useState(null);
   const [loading, setLoading] = useState(true);
   const [badges, setBadges] = useState([]);
+  const [tips, setTips] = useState({ tips: [], total: 0, count: 0 });
+  const [tipOpen, setTipOpen] = useState(false);
+  const [tipAmount, setTipAmount] = useState(50);
+  const [tipMessage, setTipMessage] = useState('');
+  const [tipSending, setTipSending] = useState(false);
+  const [tipError, setTipError] = useState('');
+  const [tipDone, setTipDone] = useState(false);
 
   useEffect(() => {
     usersAPI.getUser(id)
@@ -21,7 +28,28 @@ export default function FreelancerProfile() {
     featuresAPI.getUserBadges(id)
       .then(res => setBadges(res.data.badges))
       .catch(() => {});
+    featuresAPI.getTips(id)
+      .then(res => setTips(res.data))
+      .catch(() => {});
   }, [id]);
+
+  const sendTip = async () => {
+    setTipError('');
+    setTipSending(true);
+    try {
+      await featuresAPI.sendTip({ receiver_id: id, amount: tipAmount, message: tipMessage });
+      setTipDone(true);
+      setTimeout(() => {
+        setTipOpen(false);
+        setTipDone(false);
+        setTipMessage('');
+      }, 1800);
+    } catch (err) {
+      setTipError(err?.response?.data?.error || 'Failed to send tip');
+    } finally {
+      setTipSending(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -104,8 +132,8 @@ export default function FreelancerProfile() {
           </div>
         </div>
 
-        {/* Portfolio Link */}
-        <div className="mb-4">
+        {/* Action Row: Tip + Portfolio */}
+        <div className="mb-4 flex flex-wrap items-center gap-3">
           <Link
             to={`/portfolio/${freelancer.id}`}
             className="inline-flex items-center gap-2 px-6 py-3 bg-gebeya-600 text-white rounded-xl hover:bg-gebeya-700 transition-all font-medium text-sm shadow-sm hover:shadow-md"
@@ -114,7 +142,106 @@ export default function FreelancerProfile() {
             View Portfolio Gallery
             <span>→</span>
           </Link>
+
+          {/* Tip (Buy a coffee) */}
+          <div className="relative">
+            <button
+              onClick={() => setTipOpen(!tipOpen)}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl transition-all font-medium text-sm shadow-sm hover:shadow-md"
+              style={{ backgroundColor: '#173a32', color: '#e7f5ef' }}
+            >
+              <span>☕</span>
+              Buy a Coffee
+              {tips.count > 0 && (
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(251,225,209,0.2)' }}>{tips.count}</span>
+              )}
+            </button>
+
+            {tipOpen && (
+              <div className="absolute left-0 top-full mt-2 w-80 z-20 p-5 rounded-2xl bg-white shadow-2xl" style={{ border: '1px solid #ececec' }}>
+                {tipDone ? (
+                  <div className="text-center py-6">
+                    <span className="text-4xl block mb-2">🎉</span>
+                    <p className="font-semibold text-ice-900">Tip sent! Thank you for supporting {freelancer.full_name?.split(' ')[0]}.</p>
+                  </div>
+                ) : (
+                  <>
+                    <h4 className="font-semibold text-ice-900 mb-1">Send a tip ☕</h4>
+                    <p className="text-xs text-ice-500 mb-4">Show your appreciation — tips support Ethiopian freelancers directly.</p>
+
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {[25, 50, 100, 200, 500].map(amt => (
+                        <button key={amt} onClick={() => setTipAmount(amt)}
+                          className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
+                          style={{
+                            backgroundColor: tipAmount === amt ? '#173a32' : '#f2f2f3',
+                            color: tipAmount === amt ? '#e7f5ef' : '#777b86',
+                          }}>
+                          ETB {amt}
+                        </button>
+                      ))}
+                    </div>
+
+                    <input
+                      type="number"
+                      min="1"
+                      value={tipAmount}
+                      onChange={e => setTipAmount(Number(e.target.value))}
+                      className="w-full mb-3 px-3 py-2 rounded-xl border text-sm"
+                      style={{ borderColor: '#ececec', outline: 'none' }}
+                      placeholder="Custom amount"
+                    />
+                    <input
+                      type="text"
+                      value={tipMessage}
+                      onChange={e => setTipMessage(e.target.value)}
+                      className="w-full mb-3 px-3 py-2 rounded-xl border text-sm"
+                      style={{ borderColor: '#ececec', outline: 'none' }}
+                      placeholder="Say something nice (optional)"
+                      maxLength={140}
+                    />
+
+                    {tipError && <p className="text-xs mb-2" style={{ color: '#b91c1c' }}>{tipError}</p>}
+
+                    {user ? (
+                      <button onClick={sendTip} disabled={tipSending || tipAmount <= 0}
+                        className="w-full py-2.5 rounded-xl text-sm font-semibold transition-all"
+                        style={{ backgroundColor: '#173a32', color: '#ffffff', opacity: tipSending ? 0.6 : 1 }}>
+                        {tipSending ? 'Sending...' : `Send ETB ${tipAmount}`}
+                      </button>
+                    ) : (
+                      <Link to="/login"
+                        className="block w-full text-center py-2.5 rounded-xl text-sm font-semibold"
+                        style={{ backgroundColor: '#173a32', color: '#ffffff' }}>
+                        Sign in to send a tip
+                      </Link>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
         </div>
+
+        {/* Tips received */}
+        {tips.tips?.length > 0 && (
+          <div className="mb-6 card p-5">
+            <h3 className="font-semibold text-ice-900 mb-1">☕ Tips received</h3>
+            <p className="text-xs text-ice-500 mb-3">ETB {tips.total.toLocaleString()} from {tips.count} supporter{tips.count === 1 ? '' : 's'}</p>
+            <div className="space-y-2">
+              {tips.tips.slice(0, 5).map(tip => (
+                <div key={tip.id} className="flex items-center gap-3 p-2 rounded-xl" style={{ backgroundColor: '#fafafb' }}>
+                  <AppAvatar src={tip.sender_picture} name={tip.sender_name} size="sm" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-ice-900">{tip.sender_name}</p>
+                    {tip.message && <p className="text-xs text-ice-500 truncate">"{tip.message}"</p>}
+                  </div>
+                  <span className="text-sm font-bold" style={{ color: '#1f6f5c' }}>+ETB {Number(tip.amount).toLocaleString()}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Gigs */}
         {freelancer.gigs?.length > 0 && (

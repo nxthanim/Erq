@@ -180,10 +180,10 @@ export default function BrandPage() {
     { name: 'Ice 700', hex: '#5f5140', usage: 'Body text' },
     { name: 'Ice 500', hex: '#75644f', usage: 'Secondary text' },
     { name: 'Ice 400', hex: '#a6967e', usage: 'Disabled, placeholder' },
-    { name: 'Gebeya 500', hex: '#555555', usage: 'Primary buttons, accents' },
-    { name: 'Gebeya 600', hex: '#1a1a1a', usage: 'Hover states' },
-    { name: 'Gebeya 700', hex: '#333333', usage: 'Active, dark accents' },
-    { name: 'Gebeya 100', hex: '#e0e0e0', usage: 'Success badges, bg' },
+    { name: 'Erq 500', hex: '#555555', usage: 'Primary buttons, accents' },
+    { name: 'Erq 600', hex: '#1a1a1a', usage: 'Hover states' },
+    { name: 'Erq 700', hex: '#333333', usage: 'Active, dark accents' },
+    { name: 'Erq 100', hex: '#e0e0e0', usage: 'Success badges, bg' },
   ];
 
   return (
@@ -408,7 +408,7 @@ export default function BrandPage() {
               <div className="grid grid-cols-4 gap-4">
                 {[
                   { icon: <Circle size={24} className="text-amber-800" fill="#dcc8ae" />, title: 'Claymorphism', desc: 'Warm beige surfaces with dual shadows creating a puffy, tactile feel' },
-                  { icon: <Circle size={24} className="text-green-600" fill="#1a1a1a" />, title: 'Green Accents', desc: 'Gebeya green (#1a1a1a) for CTAs, active states, and success indicators' },
+                  { icon: <Circle size={24} className="text-green-600" fill="#1a1a1a" />, title: 'Green Accents', desc: 'Erq green (#1a1a1a) for CTAs, active states, and success indicators' },
                   { icon: <RefreshCw size={22} className="text-[#433930]" />, title: 'Magnetic Motion', desc: 'Spring-based animations for hover effects, magnetic dock, and transitions' },
                   { icon: <Flag size={22} className="text-[#433930]" />, title: 'Ethiopian Identity', desc: 'Subtle cultural patterns, warm earth tones, TeleBirr integration' },
                 ].map((p, i) => (

@@ -26,7 +26,7 @@ function TimeRangeSelector({ value, onChange }) {
       {ranges.map(r => (
         <button key={r.id} onClick={() => onChange(r.id)}
           className="relative px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-200"
-          style={{ color: value === r.id ? '#17191c' : '#777b86' }}>
+          style={{ color: value === r.id ? '#173a32' : '#777b86' }}>
           {value === r.id && (
             <motion.div layoutId="analyticsTimeBg" className="absolute inset-0 rounded-full bg-white z-0"
               style={{ boxShadow: '0 0 0 1px rgba(0,0,0,0.04)' }}
@@ -65,17 +65,17 @@ function ExportDialog() {
               <button key={opt.label} className="p-4 rounded-2xl text-left group transition-all hover:-translate-y-0.5"
                 style={{ backgroundColor: '#fafafb', border: '1px solid #ececec' }}>
                 <div className="w-10 h-10 rounded-2xl flex items-center justify-center mb-2"
-                  style={{ backgroundColor: '#f2f2f3', color: '#17191c' }}>
+                  style={{ backgroundColor: '#f2f2f3', color: '#173a32' }}>
                   {opt.icon}
                 </div>
-                <p className="text-sm font-semibold" style={{ color: '#17191c' }}>{opt.label}</p>
+                <p className="text-sm font-semibold" style={{ color: '#173a32' }}>{opt.label}</p>
                 <p className="text-[10px] mt-0.5" style={{ color: '#979799' }}>{opt.desc}</p>
               </button>
             ))}
           </div>
           <div className="flex justify-end gap-2 pt-2 border-t border-[#ececec]">
             <Button variant="secondary" size="sm" onClick={() => setOpen(false)} style={{ borderRadius: '9999px' }}>Cancel</Button>
-            <Button variant="default" size="sm" style={{ borderRadius: '9999px', backgroundColor: '#17191c', color: '#ffffff' }}>
+            <Button variant="default" size="sm" style={{ borderRadius: '9999px', backgroundColor: '#173a32', color: '#ffffff' }}>
               <Download size={14} /> Download
             </Button>
           </div>
@@ -131,20 +131,20 @@ function ModernStatCard({ title, value, icon, trend, delay = 0, isMoney = false 
       className="rounded-3xl bg-white p-5 relative overflow-hidden"
       style={{ boxShadow: '0 0 0 1px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)' }}
     >
-      <div className="absolute top-0 left-0 w-full h-[3px]" style={{ background: 'linear-gradient(90deg, #17191c, #5d2a1a)' }} />
+      <div className="absolute top-0 left-0 w-full h-[3px]" style={{ background: 'linear-gradient(90deg, #173a32, #1f6f5c)' }} />
       <div className="flex items-start justify-between mb-3">
         <div className="w-11 h-11 rounded-2xl flex items-center justify-center" style={{ backgroundColor: '#f2f2f3' }}>
-          <span style={{ color: '#17191c' }}>{icon}</span>
+          <span style={{ color: '#173a32' }}>{icon}</span>
         </div>
         {trend !== undefined && (
           <span className={`flex items-center gap-0.5 text-xs font-semibold ${trend >= 0 ? '' : ''}`}
-            style={{ color: trend >= 0 ? '#5d2a1a' : '#777b86' }}>
+            style={{ color: trend >= 0 ? '#1f6f5c' : '#777b86' }}>
             <TrendingUp size={12} className={trend < 0 ? 'rotate-180' : ''} />
             {Math.abs(trend)}%
           </span>
         )}
       </div>
-      <p className="text-2xl font-bold" style={{ color: '#17191c' }}>
+      <p className="text-2xl font-bold" style={{ color: '#173a32' }}>
         {typeof value === 'number' && isMoney ? `ETB ${value.toLocaleString()}` :
          typeof value === 'number' ? value.toLocaleString() : value}
       </p>
@@ -186,7 +186,7 @@ function FreelancerOverview({ data }) {
         <Card className="col-span-2" style={{ borderRadius: '24px', boxShadow: '0 0 0 1px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)' }}>
           <CardHeader><CardTitle>Monthly Earnings</CardTitle><CardDescription>Your earnings over time</CardDescription></CardHeader>
           <CardContent>
-            <BarChart data={earningsChart} height={200} color="#17191c" formatter={v => `ETB ${v.toLocaleString()}`} />
+            <BarChart data={earningsChart} height={200} color="#173a32" formatter={v => `ETB ${v.toLocaleString()}`} />
           </CardContent>
         </Card>
         <Card style={{ borderRadius: '24px', boxShadow: '0 0 0 1px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)' }}>
@@ -194,13 +194,13 @@ function FreelancerOverview({ data }) {
           <CardContent className="space-y-4">
             {[
               { label: 'Win Rate', value: `${data.winRate}%` },
-              { label: 'Rating', value: `${data.avgRating}`, icon: <Star size={14} style={{ color: '#5d2a1a' }} /> },
+              { label: 'Rating', value: `${data.avgRating}`, icon: <Star size={14} style={{ color: '#1f6f5c' }} /> },
               { label: 'Total Bids', value: data.totalBids?.toLocaleString() },
               { label: 'Reviews', value: data.totalReviews?.toLocaleString() },
             ].map(s => (
               <div key={s.label} className="flex items-center justify-between p-3 rounded-2xl" style={{ backgroundColor: '#fafafb' }}>
                 <span className="text-sm" style={{ color: '#777b86' }}>{s.label} {s.icon}</span>
-                <span className="text-lg font-bold" style={{ color: '#17191c' }}>{s.value}</span>
+                <span className="text-lg font-bold" style={{ color: '#173a32' }}>{s.value}</span>
               </div>
             ))}
           </CardContent>
@@ -212,10 +212,10 @@ function FreelancerOverview({ data }) {
           <div className="space-y-2">
             {(data.recentJobs || []).map(job => (
               <div key={job.id} className="flex items-center gap-3 p-3 rounded-2xl hover:bg-[#fafafb] transition-all">
-                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: job.status === 'completed' ? '#5d2a1a' : job.status === 'in_progress' ? '#17191c' : '#979799' }} />
+                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: job.status === 'completed' ? '#1f6f5c' : job.status === 'in_progress' ? '#173a32' : '#979799' }} />
                 <div className="flex-1 min-w-0">
                   <Link to={`/jobs/${job.id}`} className="text-xs font-semibold truncate block hover:underline"
-                    style={{ color: '#17191c' }}>{job.title}</Link>
+                    style={{ color: '#173a32' }}>{job.title}</Link>
                   <p className="text-[9px]" style={{ color: '#979799' }}>{job.client_name} · ETB {job.budget_max?.toLocaleString()}</p>
                 </div>
                 <Badge variant={job.status === 'completed' ? 'success' : job.status === 'in_progress' ? 'info' : 'warning'} className="text-[8px] capitalize"
@@ -249,10 +249,10 @@ function ClientOverview({ data }) {
           <CardContent>
             <div className="grid grid-cols-4 gap-4">
               {[
-                { label: 'Total', value: data.totalJobs, color: '#17191c' },
-                { label: 'Open', value: data.openJobs, color: '#5d2a1a' },
+                { label: 'Total', value: data.totalJobs, color: '#173a32' },
+                { label: 'Open', value: data.openJobs, color: '#1f6f5c' },
                 { label: 'In Progress', value: data.inProgressJobs, color: '#777b86' },
-                { label: 'Completed', value: data.completedJobs, color: '#17191c' },
+                { label: 'Completed', value: data.completedJobs, color: '#173a32' },
               ].map(s => (
                 <div key={s.label} className="text-center p-4 rounded-2xl" style={{ backgroundColor: `${s.color}08` }}>
                   <p className="text-3xl font-bold" style={{ color: s.color }}>{s.value}</p>
@@ -267,11 +267,11 @@ function ClientOverview({ data }) {
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between p-3 rounded-2xl" style={{ backgroundColor: '#fafafb' }}>
               <span className="text-sm" style={{ color: '#777b86' }}>Avg Bids/Job</span>
-              <span className="text-lg font-bold" style={{ color: '#17191c' }}>{data.avgBidsPerJob}</span>
+              <span className="text-lg font-bold" style={{ color: '#173a32' }}>{data.avgBidsPerJob}</span>
             </div>
             <div className="flex items-center justify-between p-3 rounded-2xl" style={{ backgroundColor: '#fafafb' }}>
               <span className="text-sm" style={{ color: '#777b86' }}>Completion Rate</span>
-              <span className="text-lg font-bold" style={{ color: '#17191c' }}>
+              <span className="text-lg font-bold" style={{ color: '#173a32' }}>
                 {data.totalJobs > 0 ? Math.round((data.completedJobs / data.totalJobs) * 100) : 0}%
               </span>
             </div>
@@ -284,17 +284,17 @@ function ClientOverview({ data }) {
           <div className="space-y-2">
             {(data.recentJobs || []).map(job => (
               <div key={job.id} className="flex items-center gap-3 p-3 rounded-2xl hover:bg-[#fafafb] transition-all">
-                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: job.status === 'completed' ? '#5d2a1a' : job.status === 'in_progress' ? '#17191c' : '#979799' }} />
+                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: job.status === 'completed' ? '#1f6f5c' : job.status === 'in_progress' ? '#173a32' : '#979799' }} />
                 <div className="flex-1 min-w-0">
                   <Link to={`/jobs/${job.id}`} className="text-xs font-semibold truncate block hover:underline"
-                    style={{ color: '#17191c' }}>{job.title}</Link>
+                    style={{ color: '#173a32' }}>{job.title}</Link>
                   <p className="text-[9px]" style={{ color: '#979799' }}>{job.bid_count} bids · ETB {job.budget_max?.toLocaleString()} max</p>
                 </div>
-                <span className="text-xs font-semibold" style={{ color: '#17191c' }}>{job.freelancer_name || '—'}</span>
+                <span className="text-xs font-semibold" style={{ color: '#173a32' }}>{job.freelancer_name || '—'}</span>
               </div>
             ))}
             {(!data.recentJobs || data.recentJobs.length === 0) && (
-              <p className="text-xs py-4 text-center" style={{ color: '#979799' }}>No jobs posted yet. <Link to="/post-job" className="font-semibold underline" style={{ color: '#17191c' }}>Post your first job →</Link></p>
+              <p className="text-xs py-4 text-center" style={{ color: '#979799' }}>No jobs posted yet. <Link to="/post-job" className="font-semibold underline" style={{ color: '#173a32' }}>Post your first job →</Link></p>
             )}
           </div>
         </CardContent>
@@ -323,7 +323,7 @@ function UserMessagesTab({ data }) {
       <div className="grid grid-cols-3 gap-5">
         <Card className="col-span-2" style={{ borderRadius: '24px', boxShadow: '0 0 0 1px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)' }}>
           <CardHeader><CardTitle>Message Volume</CardTitle><CardDescription>Your messages over time</CardDescription></CardHeader>
-          <CardContent><LineChart data={volumeChart} height={200} color="#17191c" gradientId="userMsgG" formatter={v => `${v} msgs`} /></CardContent>
+          <CardContent><LineChart data={volumeChart} height={200} color="#173a32" gradientId="userMsgG" formatter={v => `${v} msgs`} /></CardContent>
         </Card>
         <Card style={{ borderRadius: '24px', boxShadow: '0 0 0 1px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)' }}>
           <CardHeader><CardTitle>Top Conversations</CardTitle></CardHeader>
@@ -332,11 +332,11 @@ function UserMessagesTab({ data }) {
               {(data.topConversations || []).map((conv, i) => (
                 <div key={i} className="flex items-center gap-2 p-2 rounded-2xl hover:bg-[#fafafb]">
                   <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
-                    style={{ backgroundColor: '#f2f2f3', color: '#17191c' }}>
+                    style={{ backgroundColor: '#f2f2f3', color: '#173a32' }}>
                     {conv.peer_name?.[0] || '?'}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-semibold truncate" style={{ color: '#17191c' }}>{conv.peer_name}</p>
+                    <p className="text-[11px] font-semibold truncate" style={{ color: '#173a32' }}>{conv.peer_name}</p>
                     <p className="text-[9px]" style={{ color: '#979799' }}>{conv.msg_count} msgs</p>
                   </div>
                 </div>
@@ -378,7 +378,7 @@ function FinancialTab({ data, timeRange, chartView, setChartView, activeChart, s
                   {['line', 'bar'].map(v => (
                     <button key={v} onClick={() => setChartView(v)}
                       className="relative px-2.5 py-1 rounded-full text-[10px] font-medium capitalize"
-                      style={{ color: chartView === v ? '#17191c' : '#777b86' }}>
+                      style={{ color: chartView === v ? '#173a32' : '#777b86' }}>
                       {chartView === v && <motion.div layoutId="cv" className="absolute inset-0 rounded-full bg-white" style={{ boxShadow: '0 0 0 1px rgba(0,0,0,0.04)' }} transition={{ type: 'spring', stiffness: 400, damping: 30 }} />}
                       <span className="relative z-10">{v === 'line' ? <BarChart3 size={12} /> : <BarChart3 size={12} />}</span>
                     </button>
@@ -388,7 +388,7 @@ function FinancialTab({ data, timeRange, chartView, setChartView, activeChart, s
                   {[{ id: 'revenue', label: 'Revenue' }, { id: 'growth', label: 'Growth' }].map(t => (
                     <button key={t.id} onClick={() => setActiveChart(t.id)}
                       className="relative px-3 py-1.5 rounded-full text-[10px] font-medium"
-                      style={{ color: activeChart === t.id ? '#17191c' : '#777b86' }}>
+                      style={{ color: activeChart === t.id ? '#173a32' : '#777b86' }}>
                       {activeChart === t.id && <motion.div layoutId="ct" className="absolute inset-0 rounded-full bg-white" style={{ boxShadow: '0 0 0 1px rgba(0,0,0,0.04)' }} transition={{ type: 'spring', stiffness: 400, damping: 30 }} />}
                       <span className="relative z-10">{t.label}</span>
                     </button>
@@ -400,29 +400,29 @@ function FinancialTab({ data, timeRange, chartView, setChartView, activeChart, s
           <CardContent>
             {activeChart === 'revenue' ? (
               chartView === 'line' ? (
-                <LineChart data={monthlyChart} height={230} color="#17191c" gradientId="revG" formatter={v => `ETB ${v.toLocaleString()}`} />
+                <LineChart data={monthlyChart} height={230} color="#173a32" gradientId="revG" formatter={v => `ETB ${v.toLocaleString()}`} />
               ) : (
-                <BarChart data={monthlyChart} height={230} color="#17191c" formatter={v => `ETB ${v.toLocaleString()}`} />
+                <BarChart data={monthlyChart} height={230} color="#173a32" formatter={v => `ETB ${v.toLocaleString()}`} />
               )
             ) : (
               <div className="flex items-center justify-center h-[230px]">
                 <div className="text-center">
                   <TrendingUp size={40} className="mx-auto mb-3" style={{ color: '#979799' }} />
-                  <p className="text-3xl font-bold" style={{ color: '#17191c' }}>+{data.growthRate}%</p>
+                  <p className="text-3xl font-bold" style={{ color: '#173a32' }}>+{data.growthRate}%</p>
                   <p className="text-sm mt-1" style={{ color: '#777b86' }}>Month-over-Month Growth</p>
                 </div>
               </div>
             )}
             <div className="mt-4 pt-4 border-t border-[#ececec] flex items-center justify-between text-xs" style={{ color: '#777b86' }}>
-              <span>Total: <strong style={{ color: '#17191c' }}>ETB {totalRevenue.toLocaleString()}</strong></span>
-              <span>Monthly avg: <strong style={{ color: '#17191c' }}>ETB {avgMonthly.toLocaleString()}</strong></span>
-              <span>MoM: <strong style={{ color: data.growthRate >= 0 ? '#5d2a1a' : '#777b86' }}>{data.growthRate >= 0 ? '↑' : '↓'} {Math.abs(data.growthRate)}%</strong></span>
+              <span>Total: <strong style={{ color: '#173a32' }}>ETB {totalRevenue.toLocaleString()}</strong></span>
+              <span>Monthly avg: <strong style={{ color: '#173a32' }}>ETB {avgMonthly.toLocaleString()}</strong></span>
+              <span>MoM: <strong style={{ color: data.growthRate >= 0 ? '#1f6f5c' : '#777b86' }}>{data.growthRate >= 0 ? '↑' : '↓'} {Math.abs(data.growthRate)}%</strong></span>
             </div>
           </CardContent>
         </Card>
         <div className="col-span-1">
           <div className="rounded-3xl bg-white p-6" style={{ boxShadow: '0 0 0 1px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)' }}>
-            <h3 className="font-semibold mb-4" style={{ color: '#17191c' }}>Platform Health</h3>
+            <h3 className="font-semibold mb-4" style={{ color: '#173a32' }}>Platform Health</h3>
             <div className="space-y-3">
               {[
                 { label: 'Avg. Job Value', value: monthlyChart.length > 0 ? `ETB ${avgMonthly.toLocaleString()}` : 'ETB 0', icon: <Briefcase size={16} /> },
@@ -430,10 +430,10 @@ function FinancialTab({ data, timeRange, chartView, setChartView, activeChart, s
                 { label: 'Escrow Held', value: `ETB ${(data.escrowBalance || 0).toLocaleString()}`, icon: <Lock size={16} /> },
               ].map(m => (
                 <div key={m.label} className="flex items-center gap-3 p-3 rounded-2xl" style={{ backgroundColor: '#fafafb' }}>
-                  <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ backgroundColor: '#f2f2f3', color: '#17191c' }}>{m.icon}</div>
+                  <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ backgroundColor: '#f2f2f3', color: '#173a32' }}>{m.icon}</div>
                   <div>
                     <p className="text-[10px] font-medium" style={{ color: '#979799' }}>{m.label}</p>
-                    <p className="text-sm font-bold" style={{ color: '#17191c' }}>{m.value}</p>
+                    <p className="text-sm font-bold" style={{ color: '#173a32' }}>{m.value}</p>
                   </div>
                 </div>
               ))}
@@ -465,7 +465,7 @@ function AdminMessagesTab({ data }) {
       <div className="grid grid-cols-3 gap-5">
         <Card className="col-span-2" style={{ borderRadius: '24px', boxShadow: '0 0 0 1px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)' }}>
           <CardHeader><CardTitle>Message Volume</CardTitle><CardDescription>Monthly message count</CardDescription></CardHeader>
-          <CardContent><LineChart data={volumeChart} height={200} color="#17191c" gradientId="msgG" formatter={v => `${v} msgs`} /></CardContent>
+          <CardContent><LineChart data={volumeChart} height={200} color="#173a32" gradientId="msgG" formatter={v => `${v} msgs`} /></CardContent>
         </Card>
         <Card style={{ borderRadius: '24px', boxShadow: '0 0 0 1px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)' }}>
           <CardHeader><CardTitle>Top Conversations</CardTitle></CardHeader>
@@ -474,11 +474,11 @@ function AdminMessagesTab({ data }) {
               {(data.topConversations || []).map((conv, i) => (
                 <div key={i} className="flex items-center gap-2 p-2 rounded-2xl hover:bg-[#fafafb]">
                   <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
-                    style={{ backgroundColor: '#f2f2f3', color: '#17191c' }}>
+                    style={{ backgroundColor: '#f2f2f3', color: '#173a32' }}>
                     {conv.user1?.[0]}{conv.user2?.[0]}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-semibold truncate" style={{ color: '#17191c' }}>{conv.user1} ↔ {conv.user2}</p>
+                    <p className="text-[11px] font-semibold truncate" style={{ color: '#173a32' }}>{conv.user1} ↔ {conv.user2}</p>
                     <p className="text-[9px]" style={{ color: '#979799' }}>{conv.msg_count} msgs</p>
                   </div>
                   <Badge variant="success" className="text-[8px]" style={{ borderRadius: '9999px' }}>active</Badge>
@@ -510,11 +510,11 @@ function PlatformTab({ data }) {
       <div className="grid grid-cols-2 gap-5">
         <Card style={{ borderRadius: '24px', boxShadow: '0 0 0 1px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)' }}>
           <CardHeader><CardTitle>User Growth</CardTitle><CardDescription>New signups</CardDescription></CardHeader>
-          <CardContent><LineChart data={userGrowthChart} height={200} color="#17191c" gradientId="userG" formatter={v => `${v} users`} /></CardContent>
+          <CardContent><LineChart data={userGrowthChart} height={200} color="#173a32" gradientId="userG" formatter={v => `${v} users`} /></CardContent>
         </Card>
         <Card style={{ borderRadius: '24px', boxShadow: '0 0 0 1px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)' }}>
           <CardHeader><CardTitle>Gig Growth</CardTitle><CardDescription>New gigs created</CardDescription></CardHeader>
-          <CardContent><LineChart data={gigGrowthChart} height={200} color="#17191c" gradientId="gigG" formatter={v => `${v} gigs`} /></CardContent>
+          <CardContent><LineChart data={gigGrowthChart} height={200} color="#173a32" gradientId="gigG" formatter={v => `${v} gigs`} /></CardContent>
         </Card>
       </div>
     </div>
@@ -542,7 +542,7 @@ function PaymentsTab({ data }) {
       <div className="grid grid-cols-3 gap-5">
         <Card className="col-span-2" style={{ borderRadius: '24px', boxShadow: '0 0 0 1px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)' }}>
           <CardHeader><CardTitle>Monthly Payment Volume</CardTitle><CardDescription>Released + escrow per month</CardDescription></CardHeader>
-          <CardContent><BarChart data={monthlyVol} height={200} color="#17191c" formatter={v => `ETB ${v.toLocaleString()}`} /></CardContent>
+          <CardContent><BarChart data={monthlyVol} height={200} color="#173a32" formatter={v => `ETB ${v.toLocaleString()}`} /></CardContent>
         </Card>
         <Card style={{ borderRadius: '24px', boxShadow: '0 0 0 1px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)' }}>
           <CardHeader><CardTitle>Status Breakdown</CardTitle></CardHeader>
@@ -581,8 +581,8 @@ function DisputesTab({ data }) {
           <CardContent>
             <div className="grid grid-cols-3 gap-4">
               {[
-                { label: 'Pending', count: data.pendingDisputes, color: '#5d2a1a' },
-                { label: 'Resolved', count: data.resolvedDisputes, color: '#17191c' },
+                { label: 'Pending', count: data.pendingDisputes, color: '#1f6f5c' },
+                { label: 'Resolved', count: data.resolvedDisputes, color: '#173a32' },
                 { label: 'Total', count: data.totalDisputes, color: '#777b86' },
               ].map(s => (
                 <div key={s.label} className="text-center p-4 rounded-2xl" style={{ backgroundColor: `${s.color}08` }}>
@@ -659,7 +659,7 @@ export default function AnalyticsDashboard() {
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold flex items-center gap-2"
-              style={{ color: '#17191c', fontFamily: 'var(--font-signifier)', fontWeight: 400 }}>
+              style={{ color: '#173a32', fontFamily: 'var(--font-signifier)', fontWeight: 400 }}>
               {isAdmin ? 'Analytics Center' : 'My Analytics'}
             </h1>
             <Badge variant="success" className="text-[10px] px-2 py-0.5" style={{ borderRadius: '9999px' }}>Live</Badge>
@@ -696,35 +696,35 @@ export default function AnalyticsDashboard() {
         {isAdmin && safeMainTab === 'financial' && (
           <motion.div key="financial" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }}>
             {financial.loading ? <LoadingSpinner text="Loading financial data..." /> :
-             financial.error ? <div className="text-center py-12" style={{ color: '#5d2a1a' }}><AlertTriangle size={24} className="mx-auto mb-2" /> {financial.error}</div> :
+             financial.error ? <div className="text-center py-12" style={{ color: '#1f6f5c' }}><AlertTriangle size={24} className="mx-auto mb-2" /> {financial.error}</div> :
              <FinancialTab data={financial.data} timeRange={timeRange} chartView={chartView} setChartView={setChartView} activeChart={activeChart} setActiveChart={setActiveChart} />}
           </motion.div>
         )}
         {isAdmin && safeMainTab === 'messages' && (
           <motion.div key="messages" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }}>
             {messages.loading ? <LoadingSpinner text="Loading message data..." /> :
-             messages.error ? <div className="text-center py-12" style={{ color: '#5d2a1a' }}><AlertTriangle size={24} className="mx-auto mb-2" /> {messages.error}</div> :
+             messages.error ? <div className="text-center py-12" style={{ color: '#1f6f5c' }}><AlertTriangle size={24} className="mx-auto mb-2" /> {messages.error}</div> :
              <AdminMessagesTab data={messages.data} />}
           </motion.div>
         )}
         {isAdmin && safeMainTab === 'platform' && (
           <motion.div key="platform" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }}>
             {platform.loading ? <LoadingSpinner text="Loading platform data..." /> :
-             platform.error ? <div className="text-center py-12" style={{ color: '#5d2a1a' }}><AlertTriangle size={24} className="mx-auto mb-2" /> {platform.error}</div> :
+             platform.error ? <div className="text-center py-12" style={{ color: '#1f6f5c' }}><AlertTriangle size={24} className="mx-auto mb-2" /> {platform.error}</div> :
              <PlatformTab data={platform.data} />}
           </motion.div>
         )}
         {isAdmin && safeMainTab === 'payments' && (
           <motion.div key="payments" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }}>
             {payments.loading ? <LoadingSpinner text="Loading payment data..." /> :
-             payments.error ? <div className="text-center py-12" style={{ color: '#5d2a1a' }}><AlertTriangle size={24} className="mx-auto mb-2" /> {payments.error}</div> :
+             payments.error ? <div className="text-center py-12" style={{ color: '#1f6f5c' }}><AlertTriangle size={24} className="mx-auto mb-2" /> {payments.error}</div> :
              <PaymentsTab data={payments.data} />}
           </motion.div>
         )}
         {isAdmin && safeMainTab === 'disputes' && (
           <motion.div key="disputes" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }}>
             {disputes.loading ? <LoadingSpinner text="Loading dispute data..." /> :
-             disputes.error ? <div className="text-center py-12" style={{ color: '#5d2a1a' }}><AlertTriangle size={24} className="mx-auto mb-2" /> {disputes.error}</div> :
+             disputes.error ? <div className="text-center py-12" style={{ color: '#1f6f5c' }}><AlertTriangle size={24} className="mx-auto mb-2" /> {disputes.error}</div> :
              <DisputesTab data={disputes.data} />}
           </motion.div>
         )}
@@ -733,14 +733,14 @@ export default function AnalyticsDashboard() {
         {isFreelancer && safeMainTab === 'overview' && (
           <motion.div key="f-overview" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }}>
             {userOverview.loading ? <LoadingSpinner text="Loading your analytics..." /> :
-             userOverview.error ? <div className="text-center py-12" style={{ color: '#5d2a1a' }}><AlertTriangle size={24} className="mx-auto mb-2" /> {userOverview.error}</div> :
+             userOverview.error ? <div className="text-center py-12" style={{ color: '#1f6f5c' }}><AlertTriangle size={24} className="mx-auto mb-2" /> {userOverview.error}</div> :
              <FreelancerOverview data={userOverview.data} />}
           </motion.div>
         )}
         {isFreelancer && safeMainTab === 'messages' && (
           <motion.div key="f-messages" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }}>
             {userMessages.loading ? <LoadingSpinner text="Loading messages..." /> :
-             userMessages.error ? <div className="text-center py-12" style={{ color: '#5d2a1a' }}><AlertTriangle size={24} className="mx-auto mb-2" /> {userMessages.error}</div> :
+             userMessages.error ? <div className="text-center py-12" style={{ color: '#1f6f5c' }}><AlertTriangle size={24} className="mx-auto mb-2" /> {userMessages.error}</div> :
              <UserMessagesTab data={userMessages.data} />}
           </motion.div>
         )}
@@ -749,14 +749,14 @@ export default function AnalyticsDashboard() {
         {isClient && safeMainTab === 'overview' && (
           <motion.div key="c-overview" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }}>
             {userOverview.loading ? <LoadingSpinner text="Loading your analytics..." /> :
-             userOverview.error ? <div className="text-center py-12" style={{ color: '#5d2a1a' }}><AlertTriangle size={24} className="mx-auto mb-2" /> {userOverview.error}</div> :
+             userOverview.error ? <div className="text-center py-12" style={{ color: '#1f6f5c' }}><AlertTriangle size={24} className="mx-auto mb-2" /> {userOverview.error}</div> :
              <ClientOverview data={userOverview.data} />}
           </motion.div>
         )}
         {isClient && safeMainTab === 'messages' && (
           <motion.div key="c-messages" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }}>
             {userMessages.loading ? <LoadingSpinner text="Loading messages..." /> :
-             userMessages.error ? <div className="text-center py-12" style={{ color: '#5d2a1a' }}><AlertTriangle size={24} className="mx-auto mb-2" /> {userMessages.error}</div> :
+             userMessages.error ? <div className="text-center py-12" style={{ color: '#1f6f5c' }}><AlertTriangle size={24} className="mx-auto mb-2" /> {userMessages.error}</div> :
              <UserMessagesTab data={userMessages.data} />}
           </motion.div>
         )}
@@ -767,7 +767,7 @@ export default function AnalyticsDashboard() {
         {activeTabs.map(tab => (
           <button key={tab.id} onClick={() => setMainTab(tab.id)}
             className="relative flex-1 px-5 py-3 rounded-full text-sm font-medium transition-all duration-200 text-center"
-            style={{ color: safeMainTab === tab.id ? '#17191c' : '#777b86' }}>
+            style={{ color: safeMainTab === tab.id ? '#173a32' : '#777b86' }}>
             {safeMainTab === tab.id && (
               <motion.div layoutId="analyticsMainTab" className="absolute inset-0 rounded-full bg-white z-0"
                 style={{ boxShadow: '0 0 0 1px rgba(0,0,0,0.04)' }}
