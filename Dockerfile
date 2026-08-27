@@ -9,7 +9,8 @@ COPY requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY python_backend ./python_backend
+COPY start.py ./start.py
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "uvicorn python_backend.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["python", "start.py"]
