@@ -20,6 +20,11 @@ def _build_async_url() -> str:
     """Convert a sync Postgres URL to async (asyncpg)."""
     url = settings.DATABASE_URL
     if not url:
+        if settings.is_production:
+            raise RuntimeError(
+                "DATABASE_URL or SUPABASE_DB_URL must be set in production; "
+                "the Railway backend will not use a local database."
+            )
         return "sqlite+aiosqlite:///./erq_dev.db"
 
     # If it's already async, return as-is

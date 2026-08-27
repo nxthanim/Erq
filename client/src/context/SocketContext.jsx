@@ -1,16 +1,68 @@
 import { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react';
-import { io } from 'socket.io-client';
 import { useAuth } from './AuthContext';
 import { usersAPI } from '../utils/api';
 
 const SocketContext = createContext(null);
 
-// Track which userIds we need to monitor for online status
-// Components call isUserOnline(userId) which registers interest
+// Track which userIds we need to monitor for online status.
 const WATCHED_USERS = new Set();
+const POLL_INTERVAL = 15000;
 
-// HTTP polling interval for online status (when socket not available)
-const POLL_INTERVAL = 15000; // 15 seconds
+function getSocketUrl() {
+  const configured = (import.meta.env.VITE_SOCKET_URL || '').trim().replace(/\/+$/, '');
+  if (configured) return configured;
+
+  const apiUrl = (import.meta.env.VITE_API_URL || '').trim().replace(/\/+$/, '');
+  if (!apiUrl) return '';
+  return apiUrl.replace(/^http:/, 'ws:').replace(/^https:/, 'wss:').replace(/\/api$/, '');
+}
+
+function createSocketAdapter(websocket, dispatch) {
+  const listeners = new Map();
+  const adapter = {
+    get connected() {
+      return websocket.readyState === WebSocket.OPEN;
+    },
+    on(event, handler) {
+      const handlers = listeners.get(event) || new Set();
+      handlers.add(handler);
+      listeners.set(event, handlers);
+      return adapter;
+    },
+    off(event, handler) {
+      listeners.get(event)?.delete(handler);
+      return adapter;
+    },
+    emit(event, data) {
+      if (websocket.readyState !== WebSocket.OPEN) return false;
+      const payload = event === 'register'
+        ? { type: 'register', userId: data?.userId || data }
+        : { type: event, data: data || {} };
+      websocket.send(JSON.stringify(payload));
+      return true;
+    },
+    disconnect() {
+      websocket.close();
+    },
+  };
+
+  websocket.addEventListener('message', (event) => {
+    try {
+      const message = JSON.parse(event.data);
+      const eventName = message.type;
+      const eventPayload = message.message || message.data || message;
+      dispatch(eventName, eventPayload, listeners);
+    } catch {
+      // Ignore malformed server messages rather than breaking the provider.
+    }
+  });
+
+  return adapter;
+}
+
+function dispatch(eventName, payload, listeners) {
+  listeners.get(eventName)?.forEach((handler) => handler(payload));
+}
 
 export function SocketProvider({ children }) {
   const { user } = useAuth();
@@ -19,14 +71,11 @@ export function SocketProvider({ children }) {
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [newMessage, setNewMessage] = useState(null);
   const pollIntervalRef = useRef(null);
-  const watchedCacheRef = useRef(new Set());
 
-  // ====== SOCKET.IO CONNECTION ======
-  // The FastAPI deployment uses HTTP polling for presence by default. Only
-  // create a Socket.IO client when an explicit compatible endpoint is set;
-  // otherwise an io('/') client repeatedly hits an unsupported /socket.io
-  // polling route and floods the console with 404 errors.
-  const socketUrl = import.meta.env.VITE_SOCKET_URL;
+  const socketUrl = getSocketUrl();
+
+  // Native WebSocket connection to FastAPI on Railway. If no socket URL is
+  // configured, the provider intentionally uses the HTTP polling fallback.
   useEffect(() => {
     if (!user || !socketUrl) {
       if (socket) {
@@ -34,83 +83,65 @@ export function SocketProvider({ children }) {
         setSocket(null);
         setSocketConnected(false);
       }
-      return;
+      return undefined;
     }
 
-    const newSocket = io('/', {
-      transports: ['polling', 'websocket'],
-      reconnection: true,
-      reconnectionAttempts: 3, // Only retry 3 times, then fallback to HTTP
-      reconnectionDelay: 2000,
-      reconnectionDelayMax: 5000,
+    let adapter;
+    const websocket = new WebSocket(`${socketUrl}/socket.io/`);
+    adapter = createSocketAdapter(websocket, (eventName, payload, listeners) => {
+      if (eventName === 'user:online' && payload?.onlineUsers) {
+        setOnlineUsers(payload.onlineUsers);
+      }
+      if (eventName === 'user:offline' && payload?.userId) {
+        setOnlineUsers((prev) => prev.filter((id) => id !== payload.userId));
+      }
+      if (eventName === 'message:new') {
+        setNewMessage(payload);
+      }
+      dispatch(eventName, payload, listeners);
     });
 
-    newSocket.on('connect', () => {
-      console.log('🔌 Socket connected:', newSocket.id);
+    websocket.addEventListener('open', () => {
+      setSocket(adapter);
       setSocketConnected(true);
-      newSocket.emit('register', user.id);
+      adapter.emit('register', { userId: user.id });
     });
-
-    newSocket.on('connect_error', (err) => {
-      console.warn('⚠️ Socket connection error:', err.message);
+    websocket.addEventListener('error', () => {
       setSocketConnected(false);
     });
-
-    newSocket.on('disconnect', () => {
+    websocket.addEventListener('close', () => {
       setSocketConnected(false);
+      setSocket((current) => (current === adapter ? null : current));
     });
-
-    newSocket.on('user:online', ({ onlineUsers: users }) => {
-      setOnlineUsers(users);
-    });
-
-    newSocket.on('user:offline', ({ userId }) => {
-      setOnlineUsers(prev => prev.filter(id => id !== userId));
-    });
-
-    newSocket.on('message:new', (message) => {
-      setNewMessage(message);
-    });
-
-    newSocket.on('notification:new', (notification) => {
-      // Could trigger a toast
-    });
-
-    setSocket(newSocket);
 
     return () => {
-      newSocket.disconnect();
+      websocket.close();
       setSocketConnected(false);
+      setSocket((current) => (current === adapter ? null : current));
     };
   }, [user, socketUrl]);
 
-  // ====== HTTP POLLING FALLBACK for online status ======
-  // When socket is not available (e.g. Vercel serverless), poll via HTTP
+  // HTTP polling fallback for presence and messages when WebSocket is absent.
   const pollOnlineStatus = useCallback(async () => {
     const watched = Array.from(WATCHED_USERS).filter(Boolean);
     if (watched.length === 0) return;
-    
+
     try {
       const res = await usersAPI.getOnlineStatus(watched);
-      if (res.data?.online) {
-        setOnlineUsers(res.data.online);
-      }
-    } catch (err) {
-      // Silently fail — don't spam console
+      if (res.data?.online) setOnlineUsers(res.data.online);
+    } catch {
+      // Keep the fallback silent when the API is temporarily unavailable.
     }
   }, []);
 
-  // Start/stop polling based on socket connection status
   useEffect(() => {
     if (socketConnected) {
-      // Socket is working — no need for HTTP polling
       if (pollIntervalRef.current) {
         clearInterval(pollIntervalRef.current);
         pollIntervalRef.current = null;
       }
     } else if (user) {
-      // Socket not available — start HTTP polling
-      pollOnlineStatus(); // Immediate first poll
+      pollOnlineStatus();
       pollIntervalRef.current = setInterval(pollOnlineStatus, POLL_INTERVAL);
     }
 
@@ -122,8 +153,6 @@ export function SocketProvider({ children }) {
     };
   }, [socketConnected, user, pollOnlineStatus]);
 
-  // ====== ONLINE STATUS CHECKER ======
-  // When a component calls isUserOnline(id), register it for polling
   const isUserOnline = useCallback((userId) => {
     if (userId) WATCHED_USERS.add(String(userId));
     return onlineUsers.includes(String(userId));
