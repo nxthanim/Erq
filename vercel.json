@@ -2,7 +2,7 @@
   "version": 2,
   "framework": null,
   "buildCommand": "cd client && npm install --legacy-peer-deps --include=dev && npm run build",
-  "installCommand": "pip install -r requirements.txt",
+  "installCommand": "pip install --break-system-packages -r requirements.txt",
   "outputDirectory": "client/dist",
   "functions": {
     "api/index.py": {
