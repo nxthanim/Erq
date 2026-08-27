@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Loader2, ShoppingCart, Eye, CheckCircle, MessageCircle, ExternalLink, Search, Package, ClipboardList, Heart, User, Clock, Calendar, Lock, AlertCircle, Timer, Star, ArrowLeft } from 'lucide-react';
 import { Card, Button } from '@heroui/react';
 import AppAvatar from '../components/ui/avatar';
-import { MARKETPLACE_CATEGORIES } from '../data/categories';
+import { MARKETPLACE_CATEGORIES } from '../categories';
 import { formatETB } from '../utils/currency';
 
 const categories = ['All', ...MARKETPLACE_CATEGORIES];
