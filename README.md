@@ -1,6 +1,6 @@
-# 🏪 Gebeya - Ethiopian Freelance Marketplace
+# 🏪 Erq - Ethiopian Freelance Marketplace
 
-Gebeya is a full-stack freelance marketplace web application designed for the Ethiopian market. It connects clients with talented freelancers across categories like Translation, Graphic Design, Video Editing, Web Development, and more.
+Erq is a full-stack freelance marketplace web application designed for the Ethiopian market. It connects clients with talented freelancers across categories like Translation, Graphic Design, Video Editing, Web Development, and more.
 
 ## ✨ Features
 
