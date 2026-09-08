@@ -5,13 +5,19 @@ import { gigsAPI } from '../utils/api';
 import { MARKETPLACE_CATEGORIES } from '../categories';
 import { Plus, X, AlertCircle, Image as ImageIcon } from 'lucide-react';
 import AppAvatar from '../components/ui/avatar';
+import FileUpload from '../components/FileUpload';
 
 export default function CreateGig() {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const previewRef = useRef(null);
   const [form, setForm] = useState({
-    title: '', description: '', price: '', category: '', customCategory: '', deliveryTime: ''
+    title: '', description: '', price: '', category: '', customCategory: '', deliveryTime: '',
+    packages: [
+      { name: 'Basic', price: '', deliveryTime: '', revisions: 1, description: '' },
+      { name: 'Standard', price: '', deliveryTime: '', revisions: 2, description: '' },
+      { name: 'Premium', price: '', deliveryTime: '', revisions: 3, description: '' },
+    ]
   });
   const [files, setFiles] = useState([]);
   const [portfolioFiles, setPortfolioFiles] = useState([]);
@@ -33,6 +39,7 @@ export default function CreateGig() {
         price: parseFloat(form.price),
         category: form.category === 'Custom Category' ? form.customCategory.trim() : form.category,
         deliveryTime: parseInt(form.deliveryTime, 10),
+        packages: form.packages.filter(pkg => pkg.price && pkg.deliveryTime).map(pkg => ({ ...pkg, price: parseFloat(pkg.price), deliveryTime: parseInt(pkg.deliveryTime, 10) })),
       });
       navigate(`/gigs/${res.data.gig.id}`);
     } catch (err) {
@@ -173,6 +180,17 @@ export default function CreateGig() {
               <AlertCircle size={12} /> Add {4 - files.length} more image{files.length !== 3 ? 's' : ''} to meet the minimum requirement
             </p>
           )}
+        </div>
+
+        <div className="rounded-2xl border border-clay-100 p-5 space-y-4">
+          <div><h3 className="font-semibold text-ice-900">Service packages</h3><p className="text-xs text-ice-500 mt-1">Offer Fiverr-style Basic, Standard, and Premium options. Fill in the tiers you want to publish.</p></div>
+          <div className="grid lg:grid-cols-3 gap-4">
+            {form.packages.map((pkg, index) => <div key={pkg.name} className="rounded-2xl bg-clay-50 p-4 space-y-3">
+              <p className="font-semibold text-ice-900">{pkg.name}</p>
+              {['price','deliveryTime','revisions'].map(field => <input key={field} type="number" min="0" placeholder={field === 'price' ? 'Price (ETB)' : field === 'deliveryTime' ? 'Delivery days' : 'Revisions'} value={pkg[field]} onChange={e => setForm(prev => ({ ...prev, packages: prev.packages.map((item, i) => i === index ? { ...item, [field]: e.target.value } : item) }))} className="input-field" />)}
+              <textarea rows={2} placeholder="What is included?" value={pkg.description} onChange={e => setForm(prev => ({ ...prev, packages: prev.packages.map((item, i) => i === index ? { ...item, description: e.target.value } : item) }))} className="input-field" />
+            </div>)}
+          </div>
         </div>
 
         <FileUpload label="Portfolio Documents" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip" multiple onChange={setDocs} value={docs} description="Documents, PDFs, spreadsheets, archives (optional)" />
