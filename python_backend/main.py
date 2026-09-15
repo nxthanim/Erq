@@ -27,13 +27,15 @@ from python_backend.routers.payments import router as payments_router
 from python_backend.routers.reviews import router as reviews_router
 from python_backend.routers.admin import router as admin_router
 from python_backend.routers.features import router as features_router
-from python_backend.routers.ai import router as ai_router
 from python_backend.routers.categories import router as categories_router
 from python_backend.routers.business import router as business_router
-from python_backend.routers.agents import router as agents_router
-from python_backend.routers.wallet import router as wallet_router
 from python_backend.routers.analytics import router as analytics_router
 from python_backend.routers.ads import router as ads_router
+from python_backend.routers.ad_listings import router as ad_listings_router
+from python_backend.routers.packages import router as packages_router
+from python_backend.routers.business_listings import router as business_listings_router
+from python_backend.routers.calls import router as calls_router
+from python_backend.routers.mobile import router as mobile_router
 
 
 @asynccontextmanager
@@ -119,13 +121,15 @@ app.include_router(payments_router)
 app.include_router(reviews_router)
 app.include_router(admin_router)
 app.include_router(features_router)
-app.include_router(ai_router)
 app.include_router(categories_router)
 app.include_router(business_router)
-app.include_router(agents_router)
-app.include_router(wallet_router)
 app.include_router(analytics_router)
 app.include_router(ads_router)
+app.include_router(ad_listings_router)
+app.include_router(packages_router)
+app.include_router(business_listings_router)
+app.include_router(calls_router)
+app.include_router(mobile_router)
 
 
 # ====== WebSocket Route ======
@@ -150,6 +154,14 @@ if not settings.VERCEL:
     static_dir = os.path.join(os.path.dirname(__file__), "../client/dist")
     if os.path.exists(static_dir):
         app.mount("/", StaticFiles(directory=static_dir, html=True), name="static")
+    # Serve uploaded files for local/dev testing
+    uploads_dir = os.path.join(os.path.dirname(__file__), "../uploads")
+    try:
+        os.makedirs(uploads_dir, exist_ok=True)
+    except Exception:
+        pass
+    if os.path.exists(uploads_dir):
+        app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
 
 
 # ====== Global Error Handler ======
