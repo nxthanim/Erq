@@ -1,6 +1,8 @@
 """User routes: freelancers list, search, profiles, online status."""
 
 import uuid
+import os
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,6 +13,45 @@ from python_backend.serializers import row, rows, public_user
 from python_backend.cache import cache_ttl
 
 router = APIRouter(prefix="/api/users", tags=["users"])
+
+
+@router.get("/username/check/{username}")
+async def check_username_availability(username: str, db: AsyncSession = Depends(get_db)):
+    """Check if a username is available (not taken by another user)."""
+    uname = (username or '').strip().lower()
+    if len(uname) < 3:
+        return {"available": False, "reason": "Username must be at least 3 characters"}
+    if not uname.replace('_', '').replace('-', '').isalnum():
+        return {"available": False, "reason": "Username can only contain letters, numbers, underscores, or hyphens"}
+    conflict = await db.execute(
+        text("SELECT id FROM users WHERE LOWER(username) = :username LIMIT 1"),
+        {"username": uname},
+    )
+    taken = conflict.first() is not None
+    return {"available": not taken, "username": uname}
+
+
+@router.get("/public/{username}")
+async def get_public_profile(username: str, db: AsyncSession = Depends(get_db)):
+    try:
+        result = await db.execute(
+            text("SELECT * FROM users WHERE LOWER(username) = :username LIMIT 1"),
+            {"username": username.strip().lower()},
+        )
+        profile = result.mappings().first()
+    except Exception:
+        raise HTTPException(404, "Profile not found")
+    if not profile:
+        raise HTTPException(404, "Profile not found")
+    profile = row(profile)
+    profile.pop("password", None)
+    if profile.get("role") == "freelancer":
+        try:
+            gigs = await db.execute(text("SELECT id, title, description, price, category, delivery_time FROM gigs WHERE freelancer_id = :id AND active = 1 ORDER BY created_at DESC"), {"id": profile["id"]})
+            profile["gigs"] = rows(gigs.mappings().all())
+        except Exception:
+            profile["gigs"] = []
+    return {"user": profile}
 
 
 @router.get("/freelancers")
@@ -157,21 +198,53 @@ async def upload_profile_picture(
     user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Upload a profile picture. Returns base64 data URI for serverless."""
+    """Upload a profile picture to Supabase Storage and save its public URL."""
     content = await file.read()
     if not content:
         raise HTTPException(400, "Empty file")
     # Hard cap on upload size (5 MB) — protects memory on serverless
     if len(content) > 5 * 1024 * 1024:
         raise HTTPException(413, "Image too large (max 5 MB)")
-    import base64
-    b64 = base64.b64encode(content).decode()
-    data_uri = f"data:{file.content_type};base64,{b64}"
+    supabase_url = os.getenv("SUPABASE_URL", "").rstrip("/")
+    secret = os.getenv("SUPABASE_SECRET_KEY", "") or os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+    if not supabase_url or not secret:
+        raise HTTPException(503, "Supabase Storage is not configured")
+    safe_name = (file.filename or "profile-image").replace("/", "_").replace("\\", "_")
+    object_path = f"{user['id']}/profile/{uuid.uuid4()}-{safe_name}"
+    endpoint = f"{supabase_url}/storage/v1/object/erq-files/{object_path}"
+    async with httpx.AsyncClient(timeout=30) as client:
+        uploaded = await client.post(endpoint, content=content, headers={"Authorization": f"Bearer {secret}", "apikey": secret, "Content-Type": file.content_type or "application/octet-stream", "x-upsert": "true"})
+    if uploaded.status_code >= 300:
+        raise HTTPException(502, "Supabase Storage upload failed")
+    data_uri = f"{supabase_url}/storage/v1/object/public/erq-files/{object_path}"
     await db.execute(
         text("UPDATE users SET profile_picture = :url, updated_at = CURRENT_TIMESTAMP WHERE id = :id"),
         {"url": data_uri, "id": user["id"]},
     )
     return {"profile_picture": data_uri}
+
+
+@router.put("/resume")
+async def upload_resume(file: UploadFile = File(...), user: dict = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    content = await file.read()
+    if not content or len(content) > 10 * 1024 * 1024:
+        raise HTTPException(400, "Resume must be between 1 byte and 10 MB")
+    allowed = {"application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"}
+    if file.content_type not in allowed:
+        raise HTTPException(400, "Resume must be a PDF or Word document")
+    supabase_url = os.getenv("SUPABASE_URL", "").rstrip("/")
+    secret = os.getenv("SUPABASE_SECRET_KEY", "") or os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+    if not supabase_url or not secret:
+        raise HTTPException(503, "Supabase Storage is not configured")
+    safe_name = (file.filename or "resume.pdf").replace("/", "_").replace("\\", "_")
+    object_path = f"{user['id']}/resume/{uuid.uuid4()}-{safe_name}"
+    async with httpx.AsyncClient(timeout=30) as client:
+        uploaded = await client.post(f"{supabase_url}/storage/v1/object/erq-files/{object_path}", content=content, headers={"Authorization": f"Bearer {secret}", "apikey": secret, "Content-Type": file.content_type, "x-upsert": "true"})
+    if uploaded.status_code >= 300:
+        raise HTTPException(502, "Supabase Storage upload failed")
+    url = f"{supabase_url}/storage/v1/object/public/erq-files/{object_path}"
+    await db.execute(text("UPDATE users SET resume_url = :url, updated_at = CURRENT_TIMESTAMP WHERE id = :id"), {"url": url, "id": user["id"]})
+    return {"resume_url": url}
 
 
 @router.get("/{user_id}")
@@ -180,38 +253,44 @@ async def get_user(
     db: AsyncSession = Depends(get_db),
     current: dict = Depends(get_optional_user),
 ):
-    # Resolve by primary id first, then clerk_id (Clerk session users link a
-    # random UUID locally but the client may hold the Clerk id from a fallback).
-    result = await db.execute(
-        text("""SELECT id, email, full_name, role, phone, city, profile_picture,
-                       bio, skills, verified, rating, review_count, created_at
-                FROM users WHERE id = :id OR clerk_id = :id LIMIT 1"""),
-        {"id": user_id},
-    )
-    user_row = result.mappings().first()
+    # Use SELECT * to avoid failures when the production schema has extra or
+    # renamed columns compared to the explicit list previously used here.
+    try:
+        result = await db.execute(
+            text("SELECT * FROM users WHERE id = :id LIMIT 1"),
+            {"id": user_id},
+        )
+        user_row = result.mappings().first()
+    except Exception:
+        raise HTTPException(502, "Profile query failed")
     if not user_row:
         raise HTTPException(404, "User not found")
 
     user = public_user(user_row)
     # Privacy: only the account owner (or an admin) sees email/phone
-    if not current or (current["id"] != user["id"] and current["role"] != "admin"):
+    if not current or (current["id"] != user["id"] and current.get("role") != "admin"):
         user.pop("email", None)
         user.pop("phone", None)
-    if user["role"] == "freelancer":
-        gigs_result = await db.execute(
-            text("SELECT * FROM gigs WHERE freelancer_id = :fid AND active = 1 ORDER BY created_at DESC"),
-            {"fid": user["id"]},
-        )
-        user["gigs"] = rows(gigs_result.mappings().all())
-
-        reviews_result = await db.execute(
-            text("""
-                SELECT r.*, u.full_name as reviewer_name, u.profile_picture as reviewer_picture
-                FROM reviews r JOIN users u ON r.reviewer_id = u.id
-                WHERE r.reviewee_id = :rid ORDER BY r.created_at DESC
-            """),
-            {"rid": user["id"]},
-        )
-        user["reviews"] = rows(reviews_result.mappings().all())
+    if user.get("role") == "freelancer":
+        try:
+            gigs_result = await db.execute(
+                text("SELECT * FROM gigs WHERE freelancer_id = :fid AND active = 1 ORDER BY created_at DESC"),
+                {"fid": user["id"]},
+            )
+            user["gigs"] = rows(gigs_result.mappings().all())
+        except Exception:
+            user["gigs"] = []
+        try:
+            reviews_result = await db.execute(
+                text("""
+                    SELECT r.*, u.full_name as reviewer_name, u.profile_picture as reviewer_picture
+                    FROM reviews r JOIN users u ON r.reviewer_id = u.id
+                    WHERE r.reviewee_id = :rid ORDER BY r.created_at DESC
+                """),
+                {"rid": user["id"]},
+            )
+            user["reviews"] = rows(reviews_result.mappings().all())
+        except Exception:
+            user["reviews"] = []
 
     return {"user": user}
