@@ -12,9 +12,7 @@ const api = axios.create({
   }
 });
 
-// The auth context registers Clerk's getToken function at runtime. Keeping the
-// provider here avoids stale tokens in localStorage and lets Clerk rotate session
-// tokens without requiring a page refresh.
+// The auth context refreshes the marketplace token through Kinde when needed.
 let authTokenProvider = null;
 export const setAuthTokenProvider = (provider) => {
   authTokenProvider = provider;
@@ -31,18 +29,18 @@ api.interceptors.request.use(async (config) => {
 });
 
 // Handle 401 errors
-// In Clerk mode, Clerk owns the session Ã¢â‚¬â€ just clear the app JWT and let the
-// AuthContext bridge re-sync (it re-syncs on mount when Clerk is signed in).
-const CLERK_ENABLED = Boolean(import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      if (!CLERK_ENABLED) {
-        localStorage.removeItem('erq_token');
-        localStorage.removeItem('gebeya_user');
-      }
-      if (!CLERK_ENABLED && window.location.pathname !== '/login') {
+    const publicPath = window.location.pathname === '/'
+      || window.location.pathname === '/business'
+      || window.location.pathname === '/marketplace'
+      || window.location.pathname.startsWith('/gigs/')
+      || window.location.pathname.startsWith('/freelancers/');
+    if (error.response?.status === 401 && !publicPath) {
+      localStorage.removeItem('erq_token');
+      localStorage.removeItem('erq_user');
+      if (window.location.pathname !== '/login') {
         window.location.href = '/login';
       }
     }
@@ -90,10 +88,15 @@ export const featuresAPI = {
   lookupReferral: (code) => api.get(`/features/referral/lookup/${code}`),
   redeemReferral: (data) => api.post('/features/referral/redeem', data),
 
-  // Fan Tips (creator economy)
-  sendTip: (data) => api.post('/features/tips', data),
-  getTips: (userId) => api.get(`/features/tips/${userId}`),
-  getMyReceivedTips: () => api.get('/features/tips/me/received'),
+  // Profile reviews
+  createReview: (data) => api.post('/reviews', data),
+
+  // Pro account + Ethiopian New Year promotion
+  getProStatus: () => api.get('/features/pro'),
+  getNewYearPromo: () => api.get('/features/promo/ethiopian-new-year'),
+  saveNewYearLead: (data) => api.post('/features/promo/ethiopian-new-year/lead', data),
+  claimNewYearPro: (data) => api.post('/features/promo/ethiopian-new-year/claim', data),
+
 };
 
 // Orders (Gig Purchases with Escrow)
@@ -118,28 +121,23 @@ export const userAnalyticsAPI = {
 };
 
 // Wallet
-export const walletAPI = {
-  getOverview: () => api.get('/wallet/overview'),
-  getTransactions: (params) => api.get('/wallet/transactions', { params }),
-  recordPinAttempt: (type) => api.post('/wallet/pin-attempt', { type }),
-  getPinStatus: () => api.get('/wallet/pin-status'),
-};
-
 export default api;
 
 // Auth
 export const authAPI = {
   signup: (data) => api.post('/auth/signup', data),
   login: (data) => api.post('/auth/login', data),
+  supabaseSync: (accessToken, profile) => api.post('/auth/supabase/sync', { access_token: accessToken, ...(profile || {}) }),
+  kindeSync: (accessToken, profile) => api.post('/auth/kinde/sync', { access_token: accessToken, ...(profile || {}) }),
   me: () => api.get('/auth/me'),
-  // Clerk bridge: verify Clerk session token, get app JWT + user.
-  // Optional profile fields (full_name/email/profile_picture) are hints from
-  // the Clerk SDK so the backend can name the user correctly even when it
-  // cannot fetch the Clerk profile itself.
-  clerkSync: (clerkToken, profile) => api.post('/auth/clerk/sync', { token: clerkToken, ...(profile || {}) }),
   updateProfile: (data) => api.put('/auth/profile', data),
-  uploadProfilePicture: (formData) => api.put('/users/profile-picture', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
+  uploadProfilePicture: (formData, signal) => api.put('/users/profile-picture', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    signal,
+  }),
+  uploadResume: (formData, signal) => api.put('/users/resume', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    signal,
   }),
   // Email verification
   verifyEmail: (email, verificationData) => api.post('/auth/verify-email', { email, verificationData }),
@@ -157,7 +155,14 @@ export const usersAPI = {
   getUser: (id) => api.get(`/users/${id}`),
   getTopFreelancers: (sortBy) => api.get('/users/top-freelancers', { params: { sortBy } }),
   searchUsers: (q, limit) => api.get('/users/search', { params: { q, limit } }),
-  getOnlineStatus: (userIds) => api.get('/users/online-status', { params: { userIds: userIds.join(',') } })
+  getOnlineStatus: (userIds = []) => api.get('/users/online-status', { params: { userIds: Array.isArray(userIds) ? userIds.join(',') : '' } }),
+  getPublicProfile: (username) => api.get(`/users/public/${encodeURIComponent(username)}`),
+  checkUsername: (username) => api.get(`/users/username/check/${encodeURIComponent(username)}`),
+};
+
+export const packagesAPI = {
+  list: () => api.get('/packages'),
+  subscribe: (packageId) => api.post('/packages/subscribe', { package_id: packageId }),
 };
 
 // Gigs
@@ -177,7 +182,6 @@ export const jobsAPI = {
   get: (id) => api.get(`/jobs/${id}`),
   create: (data) => api.post('/jobs', data),
   bid: (jobId, data) => api.post(`/jobs/${jobId}/bid`, data),
-  quickOrder: (jobId, data) => api.post(`/jobs/${jobId}/quick-order`, data),
   award: (jobId, data) => api.put(`/jobs/${jobId}/award`, data),
   deliver: (jobId, data) => api.put(`/jobs/${jobId}/deliver`, data),
   updateStatus: (jobId, data) => api.put(`/jobs/${jobId}/status`, data),
@@ -190,11 +194,12 @@ export const messagesAPI = {
   getMessages: (userId) => api.get(`/messages/${userId}`),
   send: (data) => api.post('/messages', data),
   getUnreadCount: () => api.get('/messages/unread/count'),
-  uploadFile: (file) => {
+  uploadFile: (file, signal) => {
     const formData = new FormData();
     formData.append('file', file);
     return api.post('/messages/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
+      signal,
     });
   },
 };
@@ -208,8 +213,8 @@ export const paymentsAPI = {
   getTransactions: () => api.get('/payments/transactions'),
   confirmBiometric: (data) => api.post('/payments/confirm-biometric', data),
   verifyReceipt: (data) => api.post('/payments/verify-receipt', data),
-  initiateChapa: (data) => api.post('/payments/chapa/initiate', data),
-  verifyChapa: (tx_ref) => api.post('/payments/chapa/verify', { tx_ref }),
+  createDirect: (data) => api.post('/payments/direct', data),
+  confirmDirect: (transactionId) => api.post(`/payments/direct/${transactionId}/confirm`),
 };
 
 // Reviews
@@ -280,19 +285,6 @@ export const businessAPI = {
   getRevenue: () => api.get('/business/revenue'),
 };
 
-// AI Image Generation
-export const aiAPI = {
-  // Image-to-image editing (FLUX.1-kontext-dev) Ã¢â‚¬â€ requires an input image
-  generateImage: (data) => api.post('/ai/generate-image', data),
-  // Text-to-image generation (FLUX-schnell) Ã¢â‚¬â€ no input image needed
-  generateImageTxt2img: (data) => api.post('/ai/generate-image-txt2img', data),
-  chat: (data) => api.post('/ai/chat', data),
-  generateGig: (data) => api.post('/ai/generate-gig', data),
-  generateStore: (data) => api.post('/ai/generate-store', data),
-
-  getRecommendations: (params) => api.get('/ai/recommendations', { params }),
-  smartMatch: (data) => api.post('/ai/smart-match', data),
-};
 
 // Ads (create ad campaigns like ye-buna's Facebook/Instagram ad tool)
 export const adsAPI = {
@@ -303,25 +295,35 @@ export const adsAPI = {
   delete: (id) => api.delete(`/ads/${id}`),
 };
 
-// AI Agents & Subagents
-export const agentsAPI = {
-  list: () => api.get('/agents').then((response) => ({
-    ...response,
-    data: Array.isArray(response?.data) ? { agents: response.data } : response.data,
-  })),
-  create: (data) => api.post('/agents', data),
-  update: (id, data) => api.put(`/agents/${id}`, data),
-  delete: (id) => api.delete(`/agents/${id}`),
-  getConversations: (agentId) => api.get(`/agents/${agentId}/conversations`),
-  createConversation: (agentId, data) => api.post(`/agents/${agentId}/conversations`, data),
-  deleteConversation: (agentId, convId) => api.delete(`/agents/${agentId}/conversations/${convId}`),
-  getMessages: (agentId, convId) => api.get(`/agents/${agentId}/conversations/${convId}/messages`),
-  sendMessage: (agentId, convId, data) => api.post(`/agents/${agentId}/conversations/${convId}/messages`, data),
-  uploadFile: (file) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    return api.post('/agents/upload', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
-  },
+// Public marketplace ad listings
+export const adListingsAPI = {
+  list: (params) => api.get('/ad-listings', { params }),
+  get: (id) => api.get(`/ad-listings/${id}`),
+  mine: () => api.get('/ad-listings/mine'),
+  entitlements: () => api.get('/ad-listings/entitlements'),
+  create: (data) => api.post('/ad-listings', data),
+  update: (id, data) => api.put(`/ad-listings/${id}`, data),
+  delete: (id) => api.delete(`/ad-listings/${id}`),
+};
+
+// Business listings — a separate system from ad listings
+export const businessListingsAPI = {
+  list: (params) => api.get('/business-listings', { params }),
+  get: (id) => api.get(`/business-listings/${id}`),
+  mine: () => api.get('/business-listings/mine'),
+  create: (data) => api.post('/business-listings', data),
+  update: (id, data) => api.put(`/business-listings/${id}`, data),
+  delete: (id) => api.delete(`/business-listings/${id}`),
+};
+
+// Real-time voice/video calls (coolzcloud)
+export const callsAPI = {
+  loginToken: () => api.get('/calls/login-token'),
+  token: (roomId) => api.get('/calls/token', { params: { room_id: roomId } }),
+  invite: (data) => api.post('/calls/invite', data),
+  incoming: () => api.get('/calls/incoming'),
+  status: (id) => api.get(`/calls/${id}`),
+  accept: (id) => api.post(`/calls/${id}/accept`),
+  decline: (id) => api.post(`/calls/${id}/decline`),
+  end: (id) => api.post(`/calls/${id}/end`),
 };

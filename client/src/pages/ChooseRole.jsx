@@ -6,8 +6,6 @@ import { authAPI } from '../utils/api';
 import { motion } from 'motion/react';
 import { Briefcase, Handshake, Sparkles, ArrowRight, CheckCircle } from 'lucide-react';
 
-const CLERK_ENABLED = Boolean(import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
-
 export default function ChooseRole() {
   const { user, updateUser } = useAuth();
   const { t } = useLanguage();
@@ -144,7 +142,7 @@ export default function ChooseRole() {
                   </div>
                 )}
                 <div className="mt-6 flex flex-wrap gap-2">
-                  {['Post jobs', 'Hire talent', 'Escrow protection', 'ETB payments'].map(tag => (
+                  {['Post jobs', 'Hire talent', 'Trusted by peers', 'Flexible payments'].map(tag => (
                     <span key={tag} className="text-[10px] px-2.5 py-1 rounded-full"
                       style={{
                         backgroundColor: selected === 'client' ? 'rgba(255,255,255,0.1)' : '#f2f2f3',

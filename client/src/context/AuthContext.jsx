@@ -53,6 +53,35 @@ export function AuthProvider({ children }) {
     return () => { active = false; };
   }, [kindeLoading, isAuthenticated, kindeUser, getAccessToken]);
 
+  // Refresh the marketplace user (pro_status, socials, pfp) whenever we hold an
+  // app token — even without a fresh Kinde round-trip — so a cached user never
+  // shows stale entitlement after the grandfather backfill runs server-side.
+  useEffect(() => {
+    let active = true;
+    const refresh = async () => {
+      if (!token) return;
+      try {
+        const response = await authAPI.me();
+        if (!active || !response.data?.user) return;
+        localStorage.setItem('erq_user', JSON.stringify(response.data.user));
+        setUser(response.data.user);
+      } catch (error) {
+        if (error?.response?.status === 401) {
+          // The backend rejected our app token: the session is dead, so clear
+          // the stale marketplace session. Protected routes will bounce to
+          // login instead of staying stuck with an expired session.
+          localStorage.removeItem('erq_token');
+          localStorage.removeItem('erq_user');
+          if (active) { setToken(null); setUser(null); }
+          return;
+        }
+        // Keep the last known good session on transient/network failures.
+      }
+    };
+    refresh();
+    return () => { active = false; };
+  }, [token]);
+
   const login = async () => { await kindeLogin({ lang: 'en' }); };
   const signup = async () => { await kindeRegister({ lang: 'en' }); };
   const logout = async () => { localStorage.removeItem('erq_token'); localStorage.removeItem('erq_user'); setToken(null); setUser(null); await kindeLogout({ redirectUrl: window.location.origin }); };
